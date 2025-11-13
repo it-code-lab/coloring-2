@@ -455,6 +455,162 @@
         height: 55vh;
       }
     }
+
+    /* === Mobile-first improvements === */
+
+    /* Let the toolbar scroll horizontally on small screens */
+    .toolbar {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Make color swatches a bit larger on touch devices */
+    @media (max-width: 900px) {
+
+      .color-swatch,
+      .custom-swatch-wrapper,
+      #customColor,
+      #customColorDisplay {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
+    /* Collapsible toolbar */
+    .toolbar.collapsed {
+      gap: 8px;
+      padding: 8px 12px;
+    }
+
+    .toolbar.collapsed .tool-group:not(.persist) {
+      display: none;
+      /* keep only the persist group (toggle + download) visible */
+    }
+
+    /* Focus mode (hide sidebar, give canvas nearly full height) */
+    .focus-mode .sidebar {
+      display: none !important;
+    }
+
+    .focus-mode .app {
+      grid-template-columns: 1fr !important;
+    }
+
+    .focus-mode .canvas-wrapper {
+      height: calc(100vh - 140px);
+      /* header + compact toolbar */
+    }
+
+    /* On phones, make canvas taller by default */
+    @media (max-width: 600px) {
+      .canvas-wrapper {
+        height: 65vh;
+        /* more screen for drawing */
+      }
+
+      .focus-mode .canvas-wrapper {
+        height: calc(100vh - 120px);
+      }
+    }
+
+    /* Fullscreen canvas tweaks */
+    :fullscreen .canvas-wrapper,
+    :-webkit-full-screen .canvas-wrapper {
+      height: 100vh !important;
+      max-height: none !important;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    /* Make buttons easier to tap on mobile */
+    @media (max-width: 900px) {
+
+      .btn,
+      .mode-btn {
+        min-height: 38px;
+      }
+    }
+
+    /* Keep the last tool-group (Download + toggles) always visible when collapsing */
+    .tool-group.persist {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    /* === Landscape-first thumbnails === */
+    .thumbs {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      /* desktop/tablet grid */
+      gap: 10px;
+    }
+
+    .thumb {
+      aspect-ratio: 4 / 3;
+      /* landscape */
+    }
+
+    .thumb img {
+      object-fit: contain;
+      /* no cropping for line art */
+      filter: grayscale(100%);
+      opacity: 0.9;
+    }
+
+    /* Horizontal strip on small screens */
+    @media (max-width: 900px) {
+      .thumbs.horizontal {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 12px;
+        padding-bottom: 6px;
+      }
+
+      .thumbs.horizontal .thumb {
+        flex: 0 0 56vw;
+        /* big, easy to tap */
+        max-width: 420px;
+        aspect-ratio: 4 / 3;
+      }
+    }
+
+    /* Make the toolbar always reachable on mobile */
+    @media (max-width: 900px) {
+      .toolbar {
+        position: sticky;
+        top: 64px;
+        /* sits under your header */
+        z-index: 20;
+        background: #fff;
+      }
+    }
+
+    /* Canvas wrapper: let width drive height for landscape */
+    @media (min-width: 901px) {
+      .canvas-wrapper {
+        height: auto;
+        /* width dictates size */
+        max-height: none;
+        aspect-ratio: 16 / 9;
+        /* common landscape canvas */
+      }
+    }
+
+    /* Slightly smaller controls on narrow screens, but bigger tap targets */
+    @media (max-width: 900px) {
+
+      .color-swatch,
+      .custom-swatch-wrapper {
+        width: 28px;
+        height: 28px;
+      }
+
+      .btn,
+      .mode-btn {
+        min-height: 38px;
+      }
+    }
   </style>
 </head>
 
@@ -519,9 +675,19 @@
           <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>
         </div>
 
-        <div class="tool-group" style="margin-left:auto">
+        <div class="tool-group persist" style="margin-left:auto">
+          <button id="toggleToolsBtn" class="btn" title="Hide/Show Tools">
+            <i class="fas fa-chevron-up"></i> Hide Tools
+          </button>
+          <button id="focusBtn" class="btn" title="Focus Mode (hide sidebar)">
+            <i class="fas fa-maximize"></i> Focus
+          </button>
+          <button id="fsBtn" style="visibility: hidden;" class="btn" title="Fullscreen Canvas">
+            <i class="fas fa-expand"></i> Fullscreen
+          </button>
           <button id="downloadBtn" class="btn primary" title="Download your finished coloring">Download Artwork</button>
         </div>
+
       </div>
 
       <div class="canvas-wrapper">
@@ -581,6 +747,12 @@
     const drawCanvas = document.getElementById("drawCanvas");
     const lineCtx = lineCanvas.getContext("2d", { willReadFrequently: true });
     const drawCtx = drawCanvas.getContext("2d", { willReadFrequently: true });
+    const appRoot = document.body;            // for toggling focus-mode class
+    const toolbarEl = document.querySelector(".toolbar");
+    const canvasWrapper = document.querySelector(".canvas-wrapper");
+    const toggleToolsBtn = document.getElementById("toggleToolsBtn");
+    const focusBtn = document.getElementById("focusBtn");
+    const fsBtn = document.getElementById("fsBtn");
 
     // ===== STATE =====
     let currentCategory = Object.keys(COLORING_PAGES)[0];
@@ -592,9 +764,17 @@
     let undoStack = [];
     const MAX_UNDO = 25;
 
+    const thumbsEl = document.getElementById("thumbsContainer");
+    const mqlMobile = window.matchMedia("(max-width: 900px)");
+
+    let toolsCollapsed = false;
+    let focusMode = false;
+
+    let canvasCssW = 0, canvasCssH = 0, canvasDpr = 1;
+
     // ===== INIT =====
     function init() {
-      console.log("[CC] init()");
+      //console.log("[CC] init()");
       buildCategories();
       buildPalette();
       selectCategory(currentCategory);
@@ -611,6 +791,70 @@
 
       setupToolModeEvents();
       setupCustomColorEvents();
+      toggleToolsBtn.addEventListener("click", () => setToolsCollapsed(!toolsCollapsed));
+      focusBtn.addEventListener("click", () => setFocusMode(!focusMode));
+      fsBtn.addEventListener("click", toggleFullscreen);
+
+      applyResponsiveLayout();
+      mqlMobile.addEventListener("change", applyResponsiveLayout);
+
+    }
+
+    function applyResponsiveLayout() {
+      // Horizontal page strip on mobile; grid on desktop
+      thumbsEl.classList.toggle("horizontal", mqlMobile.matches);
+
+      // Refit current page to new space
+      if (currentPage) loadPage(currentPage.src, false);
+    }
+
+
+
+    function setToolsCollapsed(collapsed) {
+      toolsCollapsed = collapsed;
+      toolbarEl.classList.toggle("collapsed", collapsed);
+      // Icon + label update
+      const icon = toggleToolsBtn.querySelector("i");
+      if (collapsed) {
+        toggleToolsBtn.title = "Show Tools";
+        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Show Tools';
+      } else {
+        toggleToolsBtn.title = "Hide Tools";
+        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Tools';
+      }
+      // Refit canvas to new available space
+      if (currentPage) loadPage(currentPage.src, false);
+    }
+
+    function setFocusMode(on) {
+      focusMode = on;
+      appRoot.classList.toggle("focus-mode", on);
+      const icon = focusBtn.querySelector("i");
+      if (on) {
+        focusBtn.title = "Exit Focus";
+        focusBtn.innerHTML = '<i class="fas fa-minimize"></i> Exit Focus';
+      } else {
+        focusBtn.title = "Focus Mode (hide sidebar)";
+        focusBtn.innerHTML = '<i class="fas fa-maximize"></i> Focus';
+      }
+      if (currentPage) loadPage(currentPage.src, false);
+    }
+
+    async function toggleFullscreen() {
+      const el = document.documentElement; // or canvasWrapper
+      try {
+        if (!document.fullscreenElement) {
+          await (canvasWrapper.requestFullscreen?.() || el.requestFullscreen?.());
+          fsBtn.innerHTML = '<i class="fas fa-compress"></i> Exit Fullscreen';
+          fsBtn.title = "Exit Fullscreen";
+        } else {
+          await document.exitFullscreen();
+          fsBtn.innerHTML = '<i class="fas fa-expand"></i> Fullscreen';
+          fsBtn.title = "Fullscreen Canvas";
+        }
+      } catch (e) {
+        console.warn("Fullscreen not available:", e);
+      }
     }
 
     function setupToolModeEvents() {
@@ -623,7 +867,7 @@
 
     function setMode(mode) {
       currentMode = mode;
-      console.log("[CC] setMode:", mode);
+      //console.log("[CC] setMode:", mode);
       [modeBrushBtn, modeFillBtn, modeEyedropperBtn].forEach(btn => {
         btn.classList.toggle("active", btn.dataset.mode === mode);
       });
@@ -658,7 +902,7 @@
     }
 
     function selectCategory(cat) {
-      console.log("[CC] selectCategory:", cat);
+      //console.log("[CC] selectCategory:", cat);
       currentCategory = cat;
 
       [...categoryList.children].forEach(b =>
@@ -680,7 +924,7 @@
         div.appendChild(img);
 
         div.addEventListener("click", () => {
-          console.log("[CC] thumb click:", page.src);
+          //console.log("[CC] thumb click:", page.src);
           [...thumbsContainer.children].forEach(t =>
             t.classList.toggle("active", t === div)
           );
@@ -737,29 +981,39 @@
         return;
       }
 
-      const maxW = Math.max(260, wrapper.clientWidth - 36); // Account for 18px padding
+      // Find max box the canvas may occupy inside wrapper
+      const maxW = Math.max(260, wrapper.clientWidth - 36);
       const maxH = Math.max(260, wrapper.clientHeight - 36);
 
+      // Landscape-first: constrain by width, but don't exceed height box
       const ratio = Math.min(maxW / img.width, maxH / img.height);
-      const w = Math.max(260, Math.floor(img.width * ratio));
-      const h = Math.max(260, Math.floor(img.height * ratio));
+      const cssW = Math.floor(img.width * ratio);
+      const cssH = Math.floor(img.height * ratio);
 
-      lineCanvas.width = w;
-      lineCanvas.height = h;
-      drawCanvas.width = w;
-      drawCanvas.height = h;
+      // HiDPI backing store
+      const dpr = Math.min(window.devicePixelRatio || 1, 2); // cap at 2 for perf
+      lineCanvas.width  = Math.floor(cssW * dpr);
+      lineCanvas.height = Math.floor(cssH * dpr);
+      drawCanvas.width  = Math.floor(cssW * dpr);
+      drawCanvas.height = Math.floor(cssH * dpr);
 
-      // Reset styles for positioning
-      lineCanvas.style.width = `${w}px`;
-      lineCanvas.style.height = `${h}px`;
-      drawCanvas.style.width = `${w}px`;
-      drawCanvas.style.height = `${h}px`;
+      lineCanvas.style.width  = cssW + "px";
+      lineCanvas.style.height = cssH + "px";
+      drawCanvas.style.width  = cssW + "px";
+      drawCanvas.style.height = cssH + "px";
 
-      console.log("[CC] canvas resized:", w, "x", h);
+      // Scale contexts so 1 unit == 1 CSS pixel
+      lineCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      drawCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      canvasCssW = cssW;
+      canvasCssH = cssH;
+      canvasDpr  = dpr;
     }
 
+
     function loadPage(src, resetUndo) {
-      console.log("[CC] loadPage:", src, "resetUndo:", resetUndo);
+      //console.log("[CC] loadPage:", src, "resetUndo:", resetUndo);
       const img = new Image();
       // Enable CORS for potential external images (optional but good practice)
       img.crossOrigin = "Anonymous";
@@ -767,10 +1021,14 @@
       img.onload = () => {
         resizeCanvasToImage(img);
 
-        lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
-        lineCtx.drawImage(img, 0, 0, lineCanvas.width, lineCanvas.height);
+        // lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+        // lineCtx.drawImage(img, 0, 0, lineCanvas.width, lineCanvas.height);
 
-        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        // drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        lineCtx.clearRect(0, 0, canvasCssW, canvasCssH);
+        lineCtx.drawImage(img, 0, 0, canvasCssW, canvasCssH);
+
+        drawCtx.clearRect(0, 0, canvasCssW, canvasCssH);
 
         undoStack = [];
         if (resetUndo) saveState();
@@ -810,7 +1068,7 @@
     }
 
     function restoreState() {
-      console.log("undoStack.length = " + undoStack.length);
+      //console.log("undoStack.length = " + undoStack.length);
       if (undoStack.length <= 2) {
         downloadBtn.classList.remove("active");
         hasColored = false;
@@ -825,8 +1083,10 @@
       const url = undoStack[undoStack.length - 1];
       const img = new Image();
       img.onload = () => {
-        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-        drawCtx.drawImage(img, 0, 0);
+        // drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        // drawCtx.drawImage(img, 0, 0);
+        drawCtx.clearRect(0, 0, canvasCssW, canvasCssH);
+        drawCtx.drawImage(img, 0, 0, canvasCssW, canvasCssH);        
       };
       img.src = url;
 
@@ -844,12 +1104,13 @@
         const rect = drawCanvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        // Map to CSS pixels (NOT device pixels)
         return {
-          // Map client coordinates to canvas pixel coordinates
-          x: ((clientX - rect.left) / rect.width) * drawCanvas.width,
-          y: ((clientY - rect.top) / rect.height) * drawCanvas.height
+          x: ((clientX - rect.left) / rect.width) * canvasCssW,
+          y: ((clientY - rect.top) / rect.height) * canvasCssH
         };
       };
+
 
       const start = (e) => {
         e.preventDefault();
@@ -936,6 +1197,11 @@
 
     // New Feature: Eyedropper
     function eyedropper(x, y) {
+
+      const sx = Math.floor(x * canvasDpr);
+      const sy = Math.floor(y * canvasDpr);
+
+
       const w = drawCanvas.width;
       const h = drawCanvas.height;
       if (!w || !h) return;
@@ -953,8 +1219,8 @@
       const imgData = tctx.getImageData(0, 0, w, h);
       const data = imgData.data;
 
-      const sx = Math.floor(x);
-      const sy = Math.floor(y);
+      // const sx = Math.floor(x);
+      // const sy = Math.floor(y);
       const startIdx = (sy * w + sx) * 4;
 
       const r = data[startIdx];
@@ -970,7 +1236,7 @@
 
       // Set the new current color
       currentColor = sampledColor;
-      console.log("[CC] Eyedropper sampled color:", sampledColor);
+      //console.log("[CC] Eyedropper sampled color:", sampledColor);
 
       // Update UI
       // 1. Check if color exists in palette
@@ -994,6 +1260,11 @@
 
 
     function floodFill(startX, startY, fillColor) {
+
+      // Convert CSS-pixel input to device-pixel indices
+      const sx = Math.floor(startX * canvasDpr);
+      const sy = Math.floor(startY * canvasDpr);
+
       const w = drawCanvas.width;
       const h = drawCanvas.height;
       if (!w || !h) return;
@@ -1011,8 +1282,8 @@
       const imgData = tctx.getImageData(0, 0, w, h);
       const data = imgData.data;
 
-      const sx = Math.floor(startX);
-      const sy = Math.floor(startY);
+      // const sx = Math.floor(startX);
+      // const sy = Math.floor(startY);
       const startIdx = (sy * w + sx) * 4;
 
       const target = {
