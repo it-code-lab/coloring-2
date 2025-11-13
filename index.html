@@ -705,7 +705,7 @@
     const COPYRIGHT_TEXT = "© Creative Cubs  |  Personal Use Only";
 
     // ===== CONFIG: your pages =====
-    const COLORING_PAGES = {
+    const FALLBACK_PAGES  = {
       "Jungle Safari": [
         { id: "js-1", src: "assets/pages/a.png", label: "Cute Cow in Meadow" },
         { id: "js-2", src: "assets/pages/b.png", label: "Animal Friends" }
@@ -718,6 +718,20 @@
         { id: "mv-1", src: "assets/pages/e.png", label: "Big Truck" }
       ]
     };
+
+    let COLORING_PAGES = FALLBACK_PAGES; // will be replaced by manifest if fetch succeeds
+
+    async function boot() {
+      const m = await fetchManifestWithCache();
+      if (m) COLORING_PAGES = mapManifestToPages(m);
+
+      // Rebuild UI from COLORING_PAGES using your existing functions
+      buildCategoryButtons(COLORING_PAGES);      // you already have this
+      // Pick first category / item:
+      const firstCatKey = Object.keys(COLORING_PAGES)[0];
+      selectCategory(firstCatKey);               // you already have this
+    }
+    document.addEventListener("DOMContentLoaded", boot);
 
     // Professional Color Palette
     const PALETTE_COLORS = [
@@ -768,10 +782,65 @@
     const thumbsEl = document.getElementById("thumbsContainer");
     const mqlMobile = window.matchMedia("(max-width: 900px)");
 
+    const MANIFEST_URL = "/coloring/manifests/v1.json";   // absolute or full URL
+    const MANIFEST_MAX_AGE_MS = 60 * 60 * 1000;           // 1 hour cache
+
+
     let toolsCollapsed = false;
     let focusMode = false;
 
     let canvasCssW = 0, canvasCssH = 0, canvasDpr = 1;
+
+    async function fetchManifestWithCache() {
+      // Try cache
+      try {
+        const cached = localStorage.getItem("cc_manifest");
+        if (cached) {
+          const { savedAt, data } = JSON.parse(cached);
+          if (Date.now() - savedAt < MANIFEST_MAX_AGE_MS) {
+            console.log("[CC] Using cached manifest");
+            return data;
+          }
+        }
+      } catch { }
+
+      // Fetch fresh
+      try {
+        const res = await fetch(MANIFEST_URL, { cache: "no-cache" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+
+        // Save cache
+        try {
+          localStorage.setItem("cc_manifest", JSON.stringify({ savedAt: Date.now(), data }));
+        } catch { }
+
+        return data;
+      } catch (err) {
+        console.warn("[CC] Manifest fetch failed, using fallback:", err);
+        return null; // caller will use hardcoded fallback
+      }
+    }
+
+    // Map manifest -> your app’s structure
+    function mapManifestToPages(manifest) {
+      // expected: [{ id, title, items:[{id,label,src,thumb,w,h}] }]
+      const mapped = {};
+      for (const cat of manifest.categories || []) {
+        mapped[cat.id] = {
+          title: cat.title || cat.id.replace(/-/g, " "),
+          items: (cat.items || []).map(it => ({
+            id: it.id,
+            label: it.label || it.id,
+            src: it.src,
+            thumb: it.thumb || it.src,
+            w: it.w || 1600,
+            h: it.h || 1200
+          }))
+        };
+      }
+      return mapped;
+    }
 
     // ===== INIT =====
     function init() {
@@ -997,14 +1066,14 @@
 
       // HiDPI backing store
       const dpr = Math.min(window.devicePixelRatio || 1, 2); // cap at 2 for perf
-      lineCanvas.width  = Math.floor(cssW * dpr);
+      lineCanvas.width = Math.floor(cssW * dpr);
       lineCanvas.height = Math.floor(cssH * dpr);
-      drawCanvas.width  = Math.floor(cssW * dpr);
+      drawCanvas.width = Math.floor(cssW * dpr);
       drawCanvas.height = Math.floor(cssH * dpr);
 
-      lineCanvas.style.width  = cssW + "px";
+      lineCanvas.style.width = cssW + "px";
       lineCanvas.style.height = cssH + "px";
-      drawCanvas.style.width  = cssW + "px";
+      drawCanvas.style.width = cssW + "px";
       drawCanvas.style.height = cssH + "px";
 
       // Scale contexts so 1 unit == 1 CSS pixel
@@ -1013,7 +1082,7 @@
 
       canvasCssW = cssW;
       canvasCssH = cssH;
-      canvasDpr  = dpr;
+      canvasDpr = dpr;
     }
 
 
@@ -1024,7 +1093,7 @@
       img.crossOrigin = "Anonymous";
 
       img.onload = () => {
-        currentLineImage = img;  
+        currentLineImage = img;
         resizeCanvasToImage(img);
 
         // lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
@@ -1044,7 +1113,7 @@
         } else {
           downloadBtn.classList.add("active");
           hasColored = true;
-        }        
+        }
       };
 
       img.onerror = () => {
@@ -1093,7 +1162,7 @@
         // drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
         // drawCtx.drawImage(img, 0, 0);
         drawCtx.clearRect(0, 0, canvasCssW, canvasCssH);
-        drawCtx.drawImage(img, 0, 0, canvasCssW, canvasCssH);        
+        drawCtx.drawImage(img, 0, 0, canvasCssW, canvasCssH);
       };
       img.src = url;
 
@@ -1195,40 +1264,40 @@
     }
 
     function relayoutKeepingProgress() {
-  if (!currentLineImage) return;  // nothing loaded yet
+      if (!currentLineImage) return;  // nothing loaded yet
 
-  // 1) Snapshot the current colored layer (device-pixel size)
-  let snapshot = null;
-  if (drawCanvas.width && drawCanvas.height) {
-    snapshot = document.createElement("canvas");
-    snapshot.width  = drawCanvas.width;
-    snapshot.height = drawCanvas.height;
-    snapshot.getContext("2d").drawImage(drawCanvas, 0, 0);
-  }
+      // 1) Snapshot the current colored layer (device-pixel size)
+      let snapshot = null;
+      if (drawCanvas.width && drawCanvas.height) {
+        snapshot = document.createElement("canvas");
+        snapshot.width = drawCanvas.width;
+        snapshot.height = drawCanvas.height;
+        snapshot.getContext("2d").drawImage(drawCanvas, 0, 0);
+      }
 
-  // 2) Resize canvases to new wrapper size based on the same line image
-  resizeCanvasToImage(currentLineImage);
+      // 2) Resize canvases to new wrapper size based on the same line image
+      resizeCanvasToImage(currentLineImage);
 
-  // 3) Redraw line art at CSS size
-  lineCtx.clearRect(0, 0, canvasCssW, canvasCssH);
-  lineCtx.drawImage(currentLineImage, 0, 0, canvasCssW, canvasCssH);
+      // 3) Redraw line art at CSS size
+      lineCtx.clearRect(0, 0, canvasCssW, canvasCssH);
+      lineCtx.drawImage(currentLineImage, 0, 0, canvasCssW, canvasCssH);
 
-  // 4) Restore the colored layer, scaled to the new CSS size
-  drawCtx.clearRect(0, 0, canvasCssW, canvasCssH);
-  if (snapshot) {
-    drawCtx.drawImage(snapshot, 0, 0, canvasCssW, canvasCssH);
-  }
+      // 4) Restore the colored layer, scaled to the new CSS size
+      drawCtx.clearRect(0, 0, canvasCssW, canvasCssH);
+      if (snapshot) {
+        drawCtx.drawImage(snapshot, 0, 0, canvasCssW, canvasCssH);
+      }
 
-  // 5) Don’t touch undoStack — user progress remains.
-  //    Refresh download button state
-  if (checkIfCanvasEmpty()) {
-    downloadBtn.classList.remove("active");
-    hasColored = false;
-  } else {
-    downloadBtn.classList.add("active");
-    hasColored = true;
-  }
-}
+      // 5) Don’t touch undoStack — user progress remains.
+      //    Refresh download button state
+      if (checkIfCanvasEmpty()) {
+        downloadBtn.classList.remove("active");
+        hasColored = false;
+      } else {
+        downloadBtn.classList.add("active");
+        hasColored = true;
+      }
+    }
 
     // Helper: Hex to RGB
     function hexToRgb(hex) {
