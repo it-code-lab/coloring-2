@@ -810,7 +810,7 @@
     }
 
     function restoreState() {
-      // console.log("undoStack.length = " + undoStack.length);
+      console.log("undoStack.length = " + undoStack.length);
       if (undoStack.length <= 2) {
         downloadBtn.classList.remove("active");
         hasColored = false;
@@ -1198,6 +1198,10 @@
     }
 
     init();
+
+    [lineCanvas, drawCanvas].forEach(c => {
+      c.addEventListener("contextmenu", e => e.preventDefault());
+    });
   </script>
 
 
