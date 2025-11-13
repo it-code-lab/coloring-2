@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Creative Cubs Coloring Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #f5f7fc;
+      --primary: #ff8a5c;
+      --primary-soft: #ffe1d3;
+      --accent: #4f46e5;
+      --text: #222;
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --transition-fast: 0.2s ease-in-out;
+    }
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #fff3e8, var(--bg));
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.96);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(148,163,253,0.12);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: conic-gradient(from 200deg, #ffedd5, #fed7e2, #bfdbfe, #bbf7d0);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 700;
+    }
+    header p {
+      margin: 0;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .app {
+      padding: 16px 18px 18px;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 14px;
+      flex: 1;
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(255,255,255,0.98);
+      border-radius: var(--radius-xl);
+      padding: 12px;
+      box-shadow: var(--shadow-soft);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-self: flex-start;
+      max-height: calc(100vh - 110px);
+      overflow-y: auto;
+    }
+
+    .sidebar-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #111827;
+    }
+
+    .category-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .category-btn {
+      padding: 6px 10px;
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      white-space: nowrap;
+      color: #4b5563;
+    }
+    .category-btn:hover {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+      color: #374151;
+    }
+    .category-btn.active {
+      background: var(--primary-soft);
+      border-color: var(--primary);
+      color: #b45309;
+      font-weight: 600;
+    }
+
+    .thumbs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .thumb {
+      position: relative;
+      cursor: pointer;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid transparent;
+      transition: var(--transition-fast);
+      background: #f3f4ff;
+      aspect-ratio: 3 / 4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      color: #9ca3af;
+      text-align: center;
+    }
+
+    .thumb img {
+      max-width: 100%;
+      max-height: 100%;
+      display: block;
+      filter: grayscale(1);
+    }
+
+    .thumb:hover {
+      box-shadow: var(--shadow-soft);
+    }
+
+    .thumb.active {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .hint {
+      font-size: 10px;
+      color: #9ca3af;
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 6px 8px;
+    }
+
+    /* Main area */
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.98);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .tool-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tool-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: #9ca3af;
+      letter-spacing: 0.08em;
+    }
+
+    #palette {
+      display: flex;
+      gap: 4px;
+    }
+
+    .color-swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 1px solid rgba(148,163,253,0.4);
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    .color-swatch.active {
+      outline: 2px solid var(--accent);
+      transform: scale(1.05);
+    }
+
+    input[type="range"] {
+      accent-color: var(--accent);
+    }
+
+    select {
+      font-size: 11px;
+      padding: 4px 6px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: #374151;
+    }
+
+    .btn {
+      padding: 6px 11px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: var(--transition-fast);
+      background: #eef2ff;
+      color: #374151;
+    }
+    .btn.primary {
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      flex: 1;
+      min-height: 380px;
+      height: calc(100vh - 210px);
+      max-height: 720px;
+      background: linear-gradient(135deg, #ffffff, #eef2ff);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-soft);
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+#lineCanvas,
+#drawCanvas {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: var(--radius-lg);
+  box-sizing: border-box;
+  touch-action: none;
+}
+
+/* Line art layer */
+#lineCanvas {
+  z-index: 1;
+  pointer-events: none;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(148,163,253,0.18);
+}
+
+/* Color layer (transparent so line art is visible) */
+#drawCanvas {
+  z-index: 2;
+  background: transparent;
+}
+
+    @media (max-width: 600px) {
+      header {
+        padding: 10px 12px;
+      }
+      .app {
+        padding: 10px;
+      }
+      .canvas-wrapper {
+        height: 60vh;
+      }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo"></div>
+  <div>
+    <h1>Creative Cubs Coloring Studio</h1>
+    <p>Tap, color & create with your favourite Creative Cubs pages.</p>
+  </div>
+</header>
+
+<main class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-title">1. Choose a Theme</div>
+      <div class="category-list" id="categoryList"></div>
+    </div>
+
+    <div>
+      <div class="sidebar-title">2. Pick a Page</div>
+      <div class="thumbs" id="thumbsContainer"></div>
+    </div>
+
+    <div class="hint">
+      Tip: Add a QR code inside your printed books that opens this page,
+      so kids can color the same artwork digitally.
+    </div>
+  </aside>
+
+  <!-- MAIN AREA -->
+  <section class="main">
+    <div class="toolbar">
+      <div class="tool-group">
+        <span class="tool-label">Color</span>
+        <div id="palette"></div>
+      </div>
+
+      <div class="tool-group">
+        <span class="tool-label">Brush</span>
+        <input id="brushSize" type="range" min="3" max="32" value="10" />
+      </div>
+
+      <div class="tool-group">
+        <span class="tool-label">Mode</span>
+        <select id="modeSelect">
+          <option value="brush">Brush</option>
+          <option value="fill">Tap Fill</option>
+        </select>
+      </div>
+
+      <div class="tool-group">
+        <button class="btn" id="undoBtn">Undo</button>
+        <button class="btn" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="tool-group" style="margin-left:auto">
+        <button class="btn primary" id="downloadBtn">Download Artwork</button>
+      </div>
+    </div>
+
+    <div class="canvas-wrapper">
+      <canvas id="lineCanvas"></canvas>
+      <canvas id="drawCanvas"></canvas>
+    </div>
+  </section>
+</main>
+
+<script>
+  // ===== CONFIG: your pages =====
+  const COLORING_PAGES = {
+    "Jungle Safari": [
+      { id: "js-1", src: "assets/pages/a.png", label: "Cute Cow in Meadow" },
+      { id: "js-2", src: "assets/pages/b.png", label: "Animal Friends" }
+    ],
+    "Ocean & Sea Life": [
+      { id: "os-1", src: "assets/pages/c.png", label: "Happy Turtle" },
+      { id: "os-2", src: "assets/pages/d.png", label: "Dolphin Splash" }
+    ],
+    "Mega Vehicles": [
+      { id: "mv-1", src: "assets/pages/e.png", label: "Big Truck" }
+    ]
+  };
+
+  const PALETTE_COLORS = [
+    "#000000","#4b5563","#9ca3af",
+    "#ff595e","#ff924c","#ffca3a",
+    "#8ac926","#52b788","#06b6d4",
+    "#3b82f6","#6366f1","#a855f7",
+    "#ec4899","#f97316","#22c55e"
+  ];
+
+  // ===== DOM =====
+  const categoryList = document.getElementById("categoryList");
+  const thumbsContainer = document.getElementById("thumbsContainer");
+  const paletteContainer = document.getElementById("palette");
+  const brushSizeInput = document.getElementById("brushSize");
+  const modeSelect = document.getElementById("modeSelect");
+  const undoBtn = document.getElementById("undoBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const downloadBtn = document.getElementById("downloadBtn");
+
+  const lineCanvas = document.getElementById("lineCanvas");
+  const drawCanvas = document.getElementById("drawCanvas");
+  const lineCtx = lineCanvas.getContext("2d");
+  const drawCtx = drawCanvas.getContext("2d");
+
+  // ===== STATE =====
+  let currentCategory = Object.keys(COLORING_PAGES)[0];
+  let currentPage = null;
+  let currentColor = PALETTE_COLORS[3];
+  let isDrawing = false;
+  let lastX = 0, lastY = 0;
+  let undoStack = [];
+  const MAX_UNDO = 25;
+
+  // ===== INIT =====
+  function init() {
+    console.log("[CC] init()");
+    buildCategories();
+    buildPalette();
+    selectCategory(currentCategory);
+    setupCanvasEvents();
+    window.addEventListener("resize", () => {
+      if (currentPage) loadPage(currentPage.src, false);
+    });
+  }
+
+  function buildCategories() {
+    Object.keys(COLORING_PAGES).forEach((cat, index) => {
+      const btn = document.createElement("button");
+      btn.className = "category-btn" + (index === 0 ? " active" : "");
+      btn.textContent = cat;
+      btn.addEventListener("click", () => selectCategory(cat));
+      categoryList.appendChild(btn);
+    });
+  }
+
+  function selectCategory(cat) {
+    console.log("[CC] selectCategory:", cat);
+    currentCategory = cat;
+
+    [...categoryList.children].forEach(b =>
+      b.classList.toggle("active", b.textContent === cat)
+    );
+
+    thumbsContainer.innerHTML = "";
+    const pages = COLORING_PAGES[cat] || [];
+
+    pages.forEach((page, idx) => {
+      const div = document.createElement("div");
+      div.className = "thumb" + (idx === 0 ? " active" : "");
+      div.dataset.id = page.id;
+
+      const img = document.createElement("img");
+      img.src = page.src;
+      img.alt = page.label;
+      img.loading = "lazy";
+      div.appendChild(img);
+
+      div.addEventListener("click", () => {
+        console.log("[CC] thumb click:", page.src);
+        [...thumbsContainer.children].forEach(t =>
+          t.classList.toggle("active", t === div)
+        );
+        currentPage = page;
+        loadPage(page.src, true);
+      });
+
+      thumbsContainer.appendChild(div);
+
+      if (idx === 0) {
+        currentPage = page;
+      }
+    });
+
+    if (pages[0]) {
+      loadPage(pages[0].src, true);
+    }
+  }
+
+  function buildPalette() {
+    PALETTE_COLORS.forEach((color, idx) => {
+      const sw = document.createElement("div");
+      sw.className = "color-swatch" + (idx === 3 ? " active" : "");
+      sw.style.backgroundColor = color;
+      sw.addEventListener("click", () => {
+        currentColor = color;
+        [...paletteContainer.children].forEach(c =>
+          c.classList.toggle("active", c === sw)
+        );
+      });
+      paletteContainer.appendChild(sw);
+    });
+  }
+
+  // ===== CANVAS SIZE & IMAGE =====
+  function resizeCanvasToImage(img) {
+    const wrapper = document.querySelector(".canvas-wrapper");
+    if (!wrapper) {
+      console.warn("[CC] .canvas-wrapper not found, using fallback size");
+      lineCanvas.width = drawCanvas.width = 800;
+      lineCanvas.height = drawCanvas.height = 600;
+      return;
+    }
+
+    const maxW = Math.max(260, wrapper.clientWidth - 24);
+    const maxH = Math.max(260, wrapper.clientHeight - 24);
+
+    const ratio = Math.min(maxW / img.width, maxH / img.height);
+    const w = Math.max(260, Math.floor(img.width * ratio));
+    const h = Math.max(260, Math.floor(img.height * ratio));
+
+    lineCanvas.width = w;
+    lineCanvas.height = h;
+    drawCanvas.width = w;
+    drawCanvas.height = h;
+
+    console.log("[CC] canvas resized:", w, "x", h);
+  }
+
+  function loadPage(src, resetUndo) {
+    console.log("[CC] loadPage:", src, "resetUndo:", resetUndo);
+    const img = new Image();
+
+    img.onload = () => {
+      console.log("[CC] image loaded:", src, img.width, img.height);
+      resizeCanvasToImage(img);
+
+      lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+      lineCtx.drawImage(img, 0, 0, lineCanvas.width, lineCanvas.height);
+
+      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+      undoStack = [];
+      if (resetUndo) saveState();
+    };
+
+    img.onerror = () => {
+      console.error("[CC] ERROR loading image:", src);
+      // Visible error so it's obvious if path is wrong
+      lineCanvas.width = 480;
+      lineCanvas.height = 320;
+      drawCanvas.width = 480;
+      drawCanvas.height = 320;
+      lineCtx.clearRect(0, 0, 480, 320);
+      lineCtx.fillStyle = "#fee2e2";
+      lineCtx.fillRect(0, 0, 480, 320);
+      lineCtx.fillStyle = "#b91c1c";
+      lineCtx.font = "14px system-ui";
+      lineCtx.fillText("Image not found:", 16, 40);
+      lineCtx.fillText(src, 16, 64);
+    };
+
+    img.src = src;
+  }
+
+  // ===== STATE SAVE / RESTORE =====
+  function saveState() {
+    if (!drawCanvas.width || !drawCanvas.height) return;
+    if (undoStack.length >= MAX_UNDO) undoStack.shift();
+    undoStack.push(drawCanvas.toDataURL("image/png"));
+  }
+
+  function restoreState() {
+    if (undoStack.length <= 1) {
+      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+      return;
+    }
+    undoStack.pop();
+    const url = undoStack[undoStack.length - 1];
+    const img = new Image();
+    img.onload = () => {
+      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+      drawCtx.drawImage(img, 0, 0);
+    };
+    img.src = url;
+  }
+
+  // ===== DRAWING / FILL =====
+  function setupCanvasEvents() {
+    const getPos = (e) => {
+      const rect = drawCanvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: ((clientX - rect.left) / rect.width) * drawCanvas.width,
+        y: ((clientY - rect.top) / rect.height) * drawCanvas.height
+      };
+    };
+
+    const start = (e) => {
+      e.preventDefault();
+      if (!drawCanvas.width) {
+        console.warn("[CC] drawCanvas has zero size, ignoring draw");
+        return;
+      }
+      const { x, y } = getPos(e);
+      const mode = modeSelect.value;
+
+      if (mode === "brush") {
+        isDrawing = true;
+        lastX = x;
+        lastY = y;
+        drawCtx.lineCap = "round";
+        drawCtx.lineJoin = "round";
+        drawCtx.strokeStyle = currentColor;
+        drawCtx.lineWidth = parseInt(brushSizeInput.value, 10);
+      } else {
+        floodFill(x, y, currentColor);
+        saveState();
+      }
+    };
+
+    const move = (e) => {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const { x, y } = getPos(e);
+      drawCtx.beginPath();
+      drawCtx.moveTo(lastX, lastY);
+      drawCtx.lineTo(x, y);
+      drawCtx.stroke();
+      lastX = x;
+      lastY = y;
+    };
+
+    const end = () => {
+      if (isDrawing) {
+        isDrawing = false;
+        saveState();
+      }
+    };
+
+    ["mousedown", "touchstart"].forEach(ev =>
+      drawCanvas.addEventListener(ev, start, { passive: false })
+    );
+    ["mousemove", "touchmove"].forEach(ev =>
+      drawCanvas.addEventListener(ev, move, { passive: false })
+    );
+    ["mouseup", "mouseleave", "touchend", "touchcancel"].forEach(ev =>
+      drawCanvas.addEventListener(ev, end)
+    );
+
+    undoBtn.addEventListener("click", restoreState);
+    clearBtn.addEventListener("click", () => {
+      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+      undoStack = [];
+      saveState();
+    });
+    downloadBtn.addEventListener("click", downloadArtwork);
+  }
+
+  function hexToRgb(hex) {
+    hex = hex.replace("#", "");
+    if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
+    const num = parseInt(hex, 16);
+    return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+  }
+
+function floodFill(startX, startY, fillColor) {
+  const w = drawCanvas.width;
+  const h = drawCanvas.height;
+  if (!w || !h) return;
+
+  const temp = document.createElement("canvas");
+  temp.width = w;
+  temp.height = h;
+  const tctx = temp.getContext("2d");
+
+  // Composite (used only for region detection)
+  tctx.drawImage(lineCanvas, 0, 0);
+  tctx.drawImage(drawCanvas, 0, 0);
+
+  const imgData = tctx.getImageData(0, 0, w, h);
+  const data = imgData.data;
+
+  const sx = Math.floor(startX);
+  const sy = Math.floor(startY);
+  const startIdx = (sy * w + sx) * 4;
+
+  const target = {
+    r: data[startIdx],
+    g: data[startIdx + 1],
+    b: data[startIdx + 2],
+    a: data[startIdx + 3]
+  };
+
+  const isLinePixel = (idx) => {
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const a = data[idx + 3];
+    // treat dark, opaque pixels as line art (walls)
+    return a > 200 && r < 60 && g < 60 && b < 60;
+  };
+
+  // If clicked directly on a line, ignore
+  if (isLinePixel(startIdx)) return;
+
+  const [fr, fg, fb] = hexToRgb(fillColor);
+
+  // Small tolerance so anti-aliased edges fill nicely
+  const TOL = 16;
+  const match = (idx) => {
+    const r = data[idx];
+    const g = data[idx + 1];
+    const b = data[idx + 2];
+    const a = data[idx + 3];
+    return (
+      Math.abs(r - target.r) <= TOL &&
+      Math.abs(g - target.g) <= TOL &&
+      Math.abs(b - target.b) <= TOL &&
+      Math.abs(a - target.a) <= TOL
+    );
+  };
+
+  if (!match(startIdx)) return;
+
+  const stack = [[sx, sy]];
+
+  while (stack.length) {
+    const [x, y] = stack.pop();
+    if (x < 0 || x >= w || y < 0 || y >= h) continue;
+
+    const idx = (y * w + x) * 4;
+    if (!match(idx) || isLinePixel(idx)) continue;
+
+    // Set fill color
+    data[idx] = fr;
+    data[idx + 1] = fg;
+    data[idx + 2] = fb;
+    data[idx + 3] = 255;
+
+    stack.push([x + 1, y]);
+    stack.push([x - 1, y]);
+    stack.push([x, y + 1]);
+    stack.push([x, y - 1]);
+  }
+
+  // Remove line-art pixels from this layer so outlines stay crisp
+  for (let i = 0; i < data.length; i += 4) {
+    if (isLinePixel(i)) {
+      data[i + 3] = 0; // transparent on draw layer
+    }
+  }
+
+  // Paint only the fill result onto drawCanvas
+  drawCtx.clearRect(0, 0, w, h);
+  drawCtx.putImageData(imgData, 0, 0);
+}
+
+
+  // ===== DOWNLOAD =====
+  function downloadArtwork() {
+    if (!lineCanvas.width) return;
+    const w = lineCanvas.width;
+    const h = lineCanvas.height;
+
+    const out = document.createElement("canvas");
+    out.width = w;
+    out.height = h;
+    const octx = out.getContext("2d");
+
+    octx.fillStyle = "#ffffff";
+    octx.fillRect(0, 0, w, h);
+    octx.drawImage(lineCanvas, 0, 0);
+    octx.drawImage(drawCanvas, 0, 0);
+
+    const link = document.createElement("a");
+    link.download = "creative-cubs-coloring.png";
+    link.href = out.toDataURL("image/png");
+    link.click();
+  }
+
+  init();
+</script>
+
+
+</body>
+</html>
