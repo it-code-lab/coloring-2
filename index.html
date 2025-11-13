@@ -705,7 +705,7 @@
     const COPYRIGHT_TEXT = "© Creative Cubs  |  Personal Use Only";
 
     // ===== CONFIG: your pages =====
-    const FALLBACK_PAGES  = {
+    const FALLBACK_PAGES = {
       "Jungle Safari": [
         { id: "js-1", src: "assets/pages/a.png", label: "Cute Cow in Meadow" },
         { id: "js-2", src: "assets/pages/b.png", label: "Animal Friends" }
@@ -721,17 +721,16 @@
 
     let COLORING_PAGES = FALLBACK_PAGES; // will be replaced by manifest if fetch succeeds
 
+    let hasInited = false;
+
     async function boot() {
       const m = await fetchManifestWithCache();
       if (m) COLORING_PAGES = mapManifestToPages(m);
-
-      // Rebuild UI from COLORING_PAGES using your existing functions
-      buildCategoryButtons(COLORING_PAGES);      // you already have this
-      // Pick first category / item:
-      const firstCatKey = Object.keys(COLORING_PAGES)[0];
-      selectCategory(firstCatKey);               // you already have this
+      if (!hasInited) { hasInited = true; init(); }
     }
+
     document.addEventListener("DOMContentLoaded", boot);
+
 
     // Professional Color Palette
     const PALETTE_COLORS = [
@@ -822,25 +821,24 @@
       }
     }
 
-    // Map manifest -> your app’s structure
     function mapManifestToPages(manifest) {
-      // expected: [{ id, title, items:[{id,label,src,thumb,w,h}] }]
+      // Return the SAME shape as FALLBACK_PAGES:
+      // { "Jungle Safari": [ {id, label, src, thumb?, w?, h?}, ... ], ... }
       const mapped = {};
-      for (const cat of manifest.categories || []) {
-        mapped[cat.id] = {
-          title: cat.title || cat.id.replace(/-/g, " "),
-          items: (cat.items || []).map(it => ({
-            id: it.id,
-            label: it.label || it.id,
-            src: it.src,
-            thumb: it.thumb || it.src,
-            w: it.w || 1600,
-            h: it.h || 1200
-          }))
-        };
+      for (const cat of (manifest.categories || [])) {
+        const key = (cat.title && cat.title.trim()) || (cat.id || "").replace(/-/g, " ").trim() || "Untitled";
+        mapped[key] = (cat.items || []).map(it => ({
+          id: it.id,
+          label: it.label || it.id,
+          src: it.src,
+          thumb: it.thumb || it.src,
+          w: it.w || 1600,
+          h: it.h || 1200
+        }));
       }
       return mapped;
     }
+
 
     // ===== INIT =====
     function init() {
@@ -966,6 +964,8 @@
 
 
     function buildCategories() {
+      // NEW: clear first
+      categoryList.innerHTML = "";
       Object.keys(COLORING_PAGES).forEach((cat, index) => {
         const btn = document.createElement("button");
         btn.className = "category-btn" + (index === 0 ? " active" : "");
@@ -1580,7 +1580,6 @@
       link.click();
     }
 
-    init();
 
     [lineCanvas, drawCanvas].forEach(c => {
       c.addEventListener("contextmenu", e => e.preventDefault());
