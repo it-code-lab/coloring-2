@@ -1,27 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <title>Creative Cubs Coloring Studio</title>
+  <title>Creative Cubs Coloring Studio PRO</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
+    /* PROFESSIONAL COLOR PALETTE & STYLING */
     :root {
       --bg: #f5f7fc;
-      --primary: #ff8a5c;
-      --primary-soft: #ffe1d3;
-      --accent: #4f46e5;
-      --text: #222;
-      --radius-xl: 22px;
-      --radius-lg: 16px;
-      --shadow-soft: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --primary: #4f46e5;
+      /* Primary accent is a deep blue */
+      --primary-soft: #e0e7ff;
+      --accent: #ff8a5c;
+      /* Secondary accent is the original orange */
+      --text: #1f2937;
+      --text-soft: #6b7280;
+      --radius-xl: 18px;
+      /* Slightly tighter radius */
+      --radius-lg: 12px;
+      --shadow-soft: 0 4px 16px rgba(17, 24, 39, 0.06);
+      --shadow-hover: 0 6px 20px rgba(17, 24, 39, 0.1);
       --transition-fast: 0.2s ease-in-out;
     }
-    * { box-sizing: border-box; }
+
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top left, #fff3e8, var(--bg));
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #ffffff, var(--bg));
       color: var(--text);
       min-height: 100vh;
       display: flex;
@@ -29,230 +42,342 @@
     }
 
     header {
-      padding: 14px 24px;
+      padding: 16px 30px;
+      /* More padding */
       display: flex;
       align-items: center;
-      gap: 12px;
-      background: rgba(255,255,255,0.96);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(148,163,253,0.12);
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #f3f4f6;
       position: sticky;
       top: 0;
       z-index: 50;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      /* Subtle header shadow */
     }
 
     .logo {
-      width: 40px;
-      height: 40px;
+      width: 48px;
+      /* Larger logo */
+      height: 48px;
       border-radius: 999px;
-      background: conic-gradient(from 200deg, #ffedd5, #fed7e2, #bfdbfe, #bbf7d0);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
     }
 
     header h1 {
       margin: 0;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
     }
+
     header p {
       margin: 0;
-      font-size: 12px;
-      color: #6b7280;
+      font-size: 13px;
+      color: var(--text-soft);
     }
 
     .app {
-      padding: 16px 18px 18px;
+      padding: 20px 30px;
+      /* More padding */
       display: grid;
-      grid-template-columns: 260px minmax(0, 1fr);
-      gap: 14px;
+      grid-template-columns: 280px minmax(0, 1fr);
+      /* Wider sidebar */
+      gap: 20px;
       flex: 1;
     }
 
     @media (max-width: 900px) {
       .app {
         grid-template-columns: 1fr;
+        padding: 16px;
+        gap: 16px;
       }
     }
 
     /* Sidebar */
     .sidebar {
-      background: rgba(255,255,255,0.98);
+      background: #ffffff;
       border-radius: var(--radius-xl);
-      padding: 12px;
+      padding: 18px;
       box-shadow: var(--shadow-soft);
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 16px;
       align-self: flex-start;
-      max-height: calc(100vh - 110px);
+      max-height: calc(100vh - 120px);
       overflow-y: auto;
+      border: 1px solid #e5e7eb;
     }
 
     .sidebar-title {
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: #111827;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .category-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px;
       margin-bottom: 4px;
     }
 
     .category-btn {
-      padding: 6px 10px;
-      font-size: 11px;
+      padding: 8px 14px;
+      font-size: 13px;
       border-radius: 999px;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #d1d5db;
       background: #f9fafb;
       cursor: pointer;
       transition: var(--transition-fast);
       white-space: nowrap;
-      color: #4b5563;
+      color: var(--text-soft);
+      font-weight: 500;
     }
+
     .category-btn:hover {
-      background: #eef2ff;
-      border-color: #c7d2fe;
-      color: #374151;
+      background: #f3f4f6;
+      border-color: #9ca3af;
+      color: var(--text);
     }
+
     .category-btn.active {
-      background: var(--primary-soft);
+      background: var(--primary);
       border-color: var(--primary);
-      color: #b45309;
+      color: #ffffff;
       font-weight: 600;
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
     }
 
     .thumbs {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(2, 1fr);
+      /* Two columns for larger thumbs */
+      gap: 10px;
     }
 
     .thumb {
       position: relative;
       cursor: pointer;
-      border-radius: 10px;
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      border: 2px solid transparent;
+      border: 3px solid transparent;
       transition: var(--transition-fast);
-      background: #f3f4ff;
+      background: #f3f4f6;
       aspect-ratio: 3 / 4;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 9px;
-      color: #9ca3af;
-      text-align: center;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
     }
 
     .thumb img {
-      max-width: 100%;
-      max-height: 100%;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
-      filter: grayscale(1);
+      filter: grayscale(100%);
+      opacity: 0.8;
+      transition: var(--transition-fast);
     }
 
     .thumb:hover {
-      box-shadow: var(--shadow-soft);
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-1px);
+    }
+
+    .thumb:hover img {
+      opacity: 1;
     }
 
     .thumb.active {
       border-color: var(--accent);
-      box-shadow: var(--shadow-soft);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .thumb.active img {
+      filter: none;
+      opacity: 1;
     }
 
     .hint {
-      font-size: 10px;
-      color: #9ca3af;
-      background: #f9fafb;
-      border-radius: 10px;
-      padding: 6px 8px;
+      font-size: 12px;
+      color: var(--text-soft);
+      background: #f3f4f6;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+      padding: 10px 12px;
     }
 
     /* Main area */
     .main {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 16px;
     }
 
     .toolbar {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 14px;
-      padding: 10px 12px;
-      background: rgba(255,255,255,0.98);
+      gap: 18px;
+      padding: 12px 18px;
+      background: #ffffff;
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-soft);
+      border: 1px solid #e5e7eb;
     }
 
     .tool-group {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .tool-label {
-      font-size: 9px;
+      font-size: 10px;
       text-transform: uppercase;
-      color: #9ca3af;
+      color: var(--text-soft);
       letter-spacing: 0.08em;
+      font-weight: 600;
     }
 
     #palette {
       display: flex;
-      gap: 4px;
+      gap: 6px;
     }
 
     .color-swatch {
-      width: 18px;
-      height: 18px;
-      border-radius: 6px;
-      border: 1px solid rgba(148,163,253,0.4);
+      width: 24px;
+      /* Larger swatch */
+      height: 24px;
+      border-radius: 8px;
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
       cursor: pointer;
-      transition: var(--transition-fast);
+      transition: all var(--transition-fast);
+      position: relative;
     }
+
+    .color-swatch:hover {
+      transform: scale(1.1);
+    }
+
     .color-swatch.active {
-      outline: 2px solid var(--accent);
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
       transform: scale(1.05);
+      border-color: var(--primary-soft);
+      box-shadow: 0 0 0 1px var(--primary-soft);
+    }
+
+    /* Custom color input */
+    #customColor {
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .custom-swatch-wrapper {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--text-soft);
+      transition: var(--transition-fast);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-swatch-wrapper:hover {
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     }
 
     input[type="range"] {
-      accent-color: var(--accent);
+      accent-color: var(--primary);
     }
 
-    select {
-      font-size: 11px;
-      padding: 4px 6px;
-      border-radius: 999px;
+    /* Mode Buttons (replacing select) */
+    .mode-btn {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-lg);
       border: 1px solid #e5e7eb;
       background: #f9fafb;
-      color: #374151;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-size: 16px;
+    }
+
+    .mode-btn:hover {
+      background: #eef2ff;
+      color: var(--primary);
+    }
+
+    .mode-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
     }
 
     .btn {
-      padding: 6px 11px;
+      padding: 8px 14px;
       border-radius: 999px;
-      border: none;
+      border: 1px solid #d1d5db;
       cursor: pointer;
-      font-size: 11px;
+      font-size: 13px;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       transition: var(--transition-fast);
-      background: #eef2ff;
-      color: #374151;
+      background: #f9fafb;
+      color: var(--text);
+      font-weight: 500;
     }
+
+    .btn:hover {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+      color: var(--primary);
+    }
+
     .btn.primary {
       background: var(--accent);
+      border-color: var(--accent);
       color: #ffffff;
       font-weight: 600;
     }
-    .btn:hover {
+
+    .btn.primary:hover {
+      background: #fa7b44;
+      border-color: #fa7b44;
       transform: translateY(-1px);
       box-shadow: var(--shadow-soft);
     }
@@ -260,533 +385,739 @@
     .canvas-wrapper {
       position: relative;
       flex: 1;
-      min-height: 380px;
-      height: calc(100vh - 210px);
+      min-height: 400px;
+      height: calc(100vh - 220px);
       max-height: 720px;
-      background: linear-gradient(135deg, #ffffff, #eef2ff);
+      background: #ffffff;
       border-radius: var(--radius-xl);
       box-shadow: var(--shadow-soft);
-      padding: 14px;
+      padding: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      border: 1px solid #e5e7eb;
     }
 
-#lineCanvas,
-#drawCanvas {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: var(--radius-lg);
-  box-sizing: border-box;
-  touch-action: none;
-}
+    #lineCanvas,
+    #drawCanvas {
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: var(--radius-lg);
+      box-sizing: border-box;
+      touch-action: none;
+      background: #ffffff;
+      /* Explicit background for line layer */
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
 
-/* Line art layer */
-#lineCanvas {
-  z-index: 1;
-  pointer-events: none;
-  background: #ffffff;
-  box-shadow: inset 0 0 0 1px rgba(148,163,253,0.18);
-}
+    /* Color layer needs to be above the line art for fill/brushing to work */
+    #lineCanvas {
+      z-index: 1;
+      pointer-events: none;
+    }
 
-/* Color layer (transparent so line art is visible) */
-#drawCanvas {
-  z-index: 2;
-  background: transparent;
-}
+    #drawCanvas {
+      z-index: 2;
+      background: transparent;
+    }
 
     @media (max-width: 600px) {
       header {
-        padding: 10px 12px;
+        padding: 12px 16px;
       }
+
       .app {
+        padding: 12px;
+      }
+
+      .toolbar {
+        gap: 10px;
         padding: 10px;
       }
+
       .canvas-wrapper {
-        height: 60vh;
+        height: 55vh;
       }
     }
   </style>
 </head>
+
 <body>
-<header>
-  <div class="logo"></div>
-  <div>
-    <h1>Creative Cubs Coloring Studio</h1>
-    <p>Tap, color & create with your favourite Creative Cubs pages.</p>
-  </div>
-</header>
-
-<main class="app">
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
+  <header>
+    <div class="logo"><i class="fas fa-palette"></i></div>
     <div>
-      <div class="sidebar-title">1. Choose a Theme</div>
-      <div class="category-list" id="categoryList"></div>
+      <h1>Creative Cubs Coloring Studio PRO</h1>
+      <p>Tap, color & create with our professional drawing tools.</p>
     </div>
+  </header>
 
-    <div>
-      <div class="sidebar-title">2. Pick a Page</div>
-      <div class="thumbs" id="thumbsContainer"></div>
-    </div>
-
-    <div class="hint">
-      Tip: Add a QR code inside your printed books that opens this page,
-      so kids can color the same artwork digitally.
-    </div>
-  </aside>
-
-  <!-- MAIN AREA -->
-  <section class="main">
-    <div class="toolbar">
-      <div class="tool-group">
-        <span class="tool-label">Color</span>
-        <div id="palette"></div>
+  <main class="app">
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-title">1. Choose a Theme</div>
+        <div class="category-list" id="categoryList"></div>
       </div>
 
-      <div class="tool-group">
-        <span class="tool-label">Brush</span>
-        <input id="brushSize" type="range" min="3" max="32" value="10" />
+      <div>
+        <div class="sidebar-title">2. Pick a Page</div>
+        <div class="thumbs" id="thumbsContainer"></div>
       </div>
 
-      <div class="tool-group">
-        <span class="tool-label">Mode</span>
-        <select id="modeSelect">
-          <option value="brush">Brush</option>
-          <option value="fill">Tap Fill</option>
-        </select>
+      <div class="hint">
+        <i class="fas fa-lightbulb"></i> Tip: Use the eyedropper tool to sample colors directly from the canvas,
+        including colors you've already painted!
+      </div>
+    </aside>
+
+    <section class="main">
+      <div class="toolbar">
+        <div class="tool-group">
+          <span class="tool-label">Color Palette</span>
+          <div id="palette"></div>
+        </div>
+        <div class="tool-group">
+          <span class="tool-label">Custom</span>
+          <div class="custom-swatch-wrapper">
+            <input type="color" id="customColor" value="#10b981" />
+            <div id="customColorDisplay" class="color-swatch active" style="background-color: #10b981;"></div>
+          </div>
+        </div>
+
+        <div class="tool-group">
+          <span class="tool-label">Brush Size</span>
+          <input id="brushSize" type="range" min="3" max="50" value="10" />
+        </div>
+
+        <div class="tool-group">
+          <span class="tool-label">Mode</span>
+          <button class="mode-btn active" id="modeBrush" data-mode="brush" title="Brush Tool"><i
+              class="fas fa-paint-brush"></i></button>
+          <button class="mode-btn" id="modeFill" data-mode="fill" title="Fill/Bucket Tool"><i
+              class="fas fa-fill-drip"></i></button>
+          <button class="mode-btn" id="modeEyedropper" data-mode="eyedropper" title="Eyedropper Tool (Sample Color)"><i
+              class="fas fa-eye-dropper"></i></button>
+        </div>
+
+        <div class="tool-group">
+          <button class="btn" id="undoBtn"><i class="fas fa-undo"></i> Undo</button>
+          <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>
+        </div>
+
+        <div class="tool-group" style="margin-left:auto">
+          <button class="btn primary" id="downloadBtn"><i class="fas fa-download"></i> Download Artwork</button>
+        </div>
       </div>
 
-      <div class="tool-group">
-        <button class="btn" id="undoBtn">Undo</button>
-        <button class="btn" id="clearBtn">Clear</button>
+      <div class="canvas-wrapper">
+        <canvas id="lineCanvas"></canvas>
+        <canvas id="drawCanvas"></canvas>
       </div>
+    </section>
+  </main>
 
-      <div class="tool-group" style="margin-left:auto">
-        <button class="btn primary" id="downloadBtn">Download Artwork</button>
-      </div>
-    </div>
+  <script>
+    // ===== CONFIG: your pages =====
+    const COLORING_PAGES = {
+      "Jungle Safari": [
+        { id: "js-1", src: "assets/pages/a.png", label: "Cute Cow in Meadow" },
+        { id: "js-2", src: "assets/pages/b.png", label: "Animal Friends" }
+      ],
+      "Ocean & Sea Life": [
+        { id: "os-1", src: "assets/pages/c.png", label: "Happy Turtle" },
+        { id: "os-2", src: "assets/pages/d.png", label: "Dolphin Splash" }
+      ],
+      "Mega Vehicles": [
+        { id: "mv-1", src: "assets/pages/e.png", label: "Big Truck" }
+      ]
+    };
 
-    <div class="canvas-wrapper">
-      <canvas id="lineCanvas"></canvas>
-      <canvas id="drawCanvas"></canvas>
-    </div>
-  </section>
-</main>
+    // Professional Color Palette
+    const PALETTE_COLORS = [
+      "#000000", "#374151", "#9ca3af",
+      "#ef4444", "#f59e0b", "#10b981", /* Reds, Yellow, Green */
+      "#0ea5e9", "#3b82f6", "#6366f1", /* Blues & Purple */
+      "#ec4899", "#78350f", "#64748b"  /* Pink, Brown, Slate */
+    ];
 
-<script>
-  // ===== CONFIG: your pages =====
-  const COLORING_PAGES = {
-    "Jungle Safari": [
-      { id: "js-1", src: "assets/pages/a.png", label: "Cute Cow in Meadow" },
-      { id: "js-2", src: "assets/pages/b.png", label: "Animal Friends" }
-    ],
-    "Ocean & Sea Life": [
-      { id: "os-1", src: "assets/pages/c.png", label: "Happy Turtle" },
-      { id: "os-2", src: "assets/pages/d.png", label: "Dolphin Splash" }
-    ],
-    "Mega Vehicles": [
-      { id: "mv-1", src: "assets/pages/e.png", label: "Big Truck" }
-    ]
-  };
+    // ===== DOM =====
+    const categoryList = document.getElementById("categoryList");
+    const thumbsContainer = document.getElementById("thumbsContainer");
+    const paletteContainer = document.getElementById("palette");
+    const brushSizeInput = document.getElementById("brushSize");
+    const undoBtn = document.getElementById("undoBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
 
-  const PALETTE_COLORS = [
-    "#000000","#4b5563","#9ca3af",
-    "#ff595e","#ff924c","#ffca3a",
-    "#8ac926","#52b788","#06b6d4",
-    "#3b82f6","#6366f1","#a855f7",
-    "#ec4899","#f97316","#22c55e"
-  ];
+    const modeBrushBtn = document.getElementById("modeBrush");
+    const modeFillBtn = document.getElementById("modeFill");
+    const modeEyedropperBtn = document.getElementById("modeEyedropper");
 
-  // ===== DOM =====
-  const categoryList = document.getElementById("categoryList");
-  const thumbsContainer = document.getElementById("thumbsContainer");
-  const paletteContainer = document.getElementById("palette");
-  const brushSizeInput = document.getElementById("brushSize");
-  const modeSelect = document.getElementById("modeSelect");
-  const undoBtn = document.getElementById("undoBtn");
-  const clearBtn = document.getElementById("clearBtn");
-  const downloadBtn = document.getElementById("downloadBtn");
+    const customColorInput = document.getElementById("customColor");
+    const customColorDisplay = document.getElementById("customColorDisplay");
 
-  const lineCanvas = document.getElementById("lineCanvas");
-  const drawCanvas = document.getElementById("drawCanvas");
-  const lineCtx = lineCanvas.getContext("2d");
-  const drawCtx = drawCanvas.getContext("2d");
+    const lineCanvas = document.getElementById("lineCanvas");
+    const drawCanvas = document.getElementById("drawCanvas");
+    const lineCtx = lineCanvas.getContext("2d", { willReadFrequently: true });
+    const drawCtx = drawCanvas.getContext("2d", { willReadFrequently: true });
 
-  // ===== STATE =====
-  let currentCategory = Object.keys(COLORING_PAGES)[0];
-  let currentPage = null;
-  let currentColor = PALETTE_COLORS[3];
-  let isDrawing = false;
-  let lastX = 0, lastY = 0;
-  let undoStack = [];
-  const MAX_UNDO = 25;
+    // ===== STATE =====
+    let currentCategory = Object.keys(COLORING_PAGES)[0];
+    let currentPage = null;
+    let currentColor = PALETTE_COLORS[5]; // Default to a nice green
+    let currentMode = "brush";
+    let isDrawing = false;
+    let lastX = 0, lastY = 0;
+    let undoStack = [];
+    const MAX_UNDO = 25;
 
-  // ===== INIT =====
-  function init() {
-    console.log("[CC] init()");
-    buildCategories();
-    buildPalette();
-    selectCategory(currentCategory);
-    setupCanvasEvents();
-    window.addEventListener("resize", () => {
-      if (currentPage) loadPage(currentPage.src, false);
-    });
-  }
+    // ===== INIT =====
+    function init() {
+      console.log("[CC] init()");
+      buildCategories();
+      buildPalette();
+      selectCategory(currentCategory);
+      setupCanvasEvents();
 
-  function buildCategories() {
-    Object.keys(COLORING_PAGES).forEach((cat, index) => {
-      const btn = document.createElement("button");
-      btn.className = "category-btn" + (index === 0 ? " active" : "");
-      btn.textContent = cat;
-      btn.addEventListener("click", () => selectCategory(cat));
-      categoryList.appendChild(btn);
-    });
-  }
+      // Set initial custom color
+      currentColor = customColorInput.value;
+      customColorDisplay.style.backgroundColor = currentColor;
 
-  function selectCategory(cat) {
-    console.log("[CC] selectCategory:", cat);
-    currentCategory = cat;
-
-    [...categoryList.children].forEach(b =>
-      b.classList.toggle("active", b.textContent === cat)
-    );
-
-    thumbsContainer.innerHTML = "";
-    const pages = COLORING_PAGES[cat] || [];
-
-    pages.forEach((page, idx) => {
-      const div = document.createElement("div");
-      div.className = "thumb" + (idx === 0 ? " active" : "");
-      div.dataset.id = page.id;
-
-      const img = document.createElement("img");
-      img.src = page.src;
-      img.alt = page.label;
-      img.loading = "lazy";
-      div.appendChild(img);
-
-      div.addEventListener("click", () => {
-        console.log("[CC] thumb click:", page.src);
-        [...thumbsContainer.children].forEach(t =>
-          t.classList.toggle("active", t === div)
-        );
-        currentPage = page;
-        loadPage(page.src, true);
+      window.addEventListener("resize", () => {
+        if (currentPage) loadPage(currentPage.src, false);
       });
 
-      thumbsContainer.appendChild(div);
+      setupToolModeEvents();
+      setupCustomColorEvents();
+    }
 
-      if (idx === 0) {
-        currentPage = page;
+    function setupToolModeEvents() {
+      [modeBrushBtn, modeFillBtn, modeEyedropperBtn].forEach(btn => {
+        btn.addEventListener("click", () => {
+          setMode(btn.dataset.mode);
+        });
+      });
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      console.log("[CC] setMode:", mode);
+      [modeBrushBtn, modeFillBtn, modeEyedropperBtn].forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.mode === mode);
+      });
+    }
+
+    function setupCustomColorEvents() {
+      // Change via native color picker
+      customColorInput.addEventListener("input", (e) => {
+        const newColor = e.target.value; // always #hex
+        currentColor = newColor;
+        customColorDisplay.style.backgroundColor = newColor;
+        setMode("brush");                 // ready to paint right away
+        updateActiveColorSwatch(null);    // mark custom as active
+      });
+
+      // Clicking the visible swatch opens the hidden color input
+      customColorDisplay.addEventListener("click", () => {
+        customColorInput.click();         // open picker
+      });
+    }
+
+
+
+    function buildCategories() {
+      Object.keys(COLORING_PAGES).forEach((cat, index) => {
+        const btn = document.createElement("button");
+        btn.className = "category-btn" + (index === 0 ? " active" : "");
+        btn.textContent = cat;
+        btn.addEventListener("click", () => selectCategory(cat));
+        categoryList.appendChild(btn);
+      });
+    }
+
+    function selectCategory(cat) {
+      console.log("[CC] selectCategory:", cat);
+      currentCategory = cat;
+
+      [...categoryList.children].forEach(b =>
+        b.classList.toggle("active", b.textContent === cat)
+      );
+
+      thumbsContainer.innerHTML = "";
+      const pages = COLORING_PAGES[cat] || [];
+
+      pages.forEach((page, idx) => {
+        const div = document.createElement("div");
+        div.className = "thumb" + (idx === 0 ? " active" : "");
+        div.dataset.id = page.id;
+
+        const img = document.createElement("img");
+        img.src = page.src;
+        img.alt = page.label;
+        img.loading = "lazy";
+        div.appendChild(img);
+
+        div.addEventListener("click", () => {
+          console.log("[CC] thumb click:", page.src);
+          [...thumbsContainer.children].forEach(t =>
+            t.classList.toggle("active", t === div)
+          );
+          currentPage = page;
+          loadPage(page.src, true);
+        });
+
+        thumbsContainer.appendChild(div);
+
+        if (idx === 0) {
+          currentPage = page;
+        }
+      });
+
+      if (pages[0]) {
+        loadPage(pages[0].src, true);
       }
-    });
-
-    if (pages[0]) {
-      loadPage(pages[0].src, true);
     }
-  }
 
-  function buildPalette() {
-    PALETTE_COLORS.forEach((color, idx) => {
-      const sw = document.createElement("div");
-      sw.className = "color-swatch" + (idx === 3 ? " active" : "");
-      sw.style.backgroundColor = color;
-      sw.addEventListener("click", () => {
-        currentColor = color;
-        [...paletteContainer.children].forEach(c =>
-          c.classList.toggle("active", c === sw)
-        );
+    function buildPalette() {
+      PALETTE_COLORS.forEach((color) => {
+        const sw = document.createElement("div");
+        sw.className = "color-swatch";
+        sw.style.backgroundColor = color;
+        sw.addEventListener("click", () => {
+          currentColor = color;
+          setMode("brush"); // Revert to brush mode after color selection for good UX
+          updateActiveColorSwatch(sw);
+        });
+        paletteContainer.appendChild(sw);
       });
-      paletteContainer.appendChild(sw);
-    });
-  }
 
-  // ===== CANVAS SIZE & IMAGE =====
-  function resizeCanvasToImage(img) {
-    const wrapper = document.querySelector(".canvas-wrapper");
-    if (!wrapper) {
-      console.warn("[CC] .canvas-wrapper not found, using fallback size");
-      lineCanvas.width = drawCanvas.width = 800;
-      lineCanvas.height = drawCanvas.height = 600;
-      return;
+      // Manually set initial active state for the default color
+      const defaultSwatch = paletteContainer.children[PALETTE_COLORS.indexOf(currentColor)];
+      if (defaultSwatch) updateActiveColorSwatch(defaultSwatch);
     }
 
-    const maxW = Math.max(260, wrapper.clientWidth - 24);
-    const maxH = Math.max(260, wrapper.clientHeight - 24);
-
-    const ratio = Math.min(maxW / img.width, maxH / img.height);
-    const w = Math.max(260, Math.floor(img.width * ratio));
-    const h = Math.max(260, Math.floor(img.height * ratio));
-
-    lineCanvas.width = w;
-    lineCanvas.height = h;
-    drawCanvas.width = w;
-    drawCanvas.height = h;
-
-    console.log("[CC] canvas resized:", w, "x", h);
-  }
-
-  function loadPage(src, resetUndo) {
-    console.log("[CC] loadPage:", src, "resetUndo:", resetUndo);
-    const img = new Image();
-
-    img.onload = () => {
-      console.log("[CC] image loaded:", src, img.width, img.height);
-      resizeCanvasToImage(img);
-
-      lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
-      lineCtx.drawImage(img, 0, 0, lineCanvas.width, lineCanvas.height);
-
-      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-
-      undoStack = [];
-      if (resetUndo) saveState();
-    };
-
-    img.onerror = () => {
-      console.error("[CC] ERROR loading image:", src);
-      // Visible error so it's obvious if path is wrong
-      lineCanvas.width = 480;
-      lineCanvas.height = 320;
-      drawCanvas.width = 480;
-      drawCanvas.height = 320;
-      lineCtx.clearRect(0, 0, 480, 320);
-      lineCtx.fillStyle = "#fee2e2";
-      lineCtx.fillRect(0, 0, 480, 320);
-      lineCtx.fillStyle = "#b91c1c";
-      lineCtx.font = "14px system-ui";
-      lineCtx.fillText("Image not found:", 16, 40);
-      lineCtx.fillText(src, 16, 64);
-    };
-
-    img.src = src;
-  }
-
-  // ===== STATE SAVE / RESTORE =====
-  function saveState() {
-    if (!drawCanvas.width || !drawCanvas.height) return;
-    if (undoStack.length >= MAX_UNDO) undoStack.shift();
-    undoStack.push(drawCanvas.toDataURL("image/png"));
-  }
-
-  function restoreState() {
-    if (undoStack.length <= 1) {
-      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-      return;
+    function updateActiveColorSwatch(activeSwatch) {
+      [...paletteContainer.children].forEach(c => c.classList.remove("active"));
+      if (activeSwatch) {
+        activeSwatch.classList.add("active");
+        customColorDisplay.classList.remove("active");
+      } else {
+        customColorDisplay.classList.add("active");
+      }
     }
-    undoStack.pop();
-    const url = undoStack[undoStack.length - 1];
-    const img = new Image();
-    img.onload = () => {
-      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-      drawCtx.drawImage(img, 0, 0);
-    };
-    img.src = url;
-  }
 
-  // ===== DRAWING / FILL =====
-  function setupCanvasEvents() {
-    const getPos = (e) => {
-      const rect = drawCanvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      return {
-        x: ((clientX - rect.left) / rect.width) * drawCanvas.width,
-        y: ((clientY - rect.top) / rect.height) * drawCanvas.height
-      };
-    };
-
-    const start = (e) => {
-      e.preventDefault();
-      if (!drawCanvas.width) {
-        console.warn("[CC] drawCanvas has zero size, ignoring draw");
+    // ===== CANVAS SIZE & IMAGE =====
+    function resizeCanvasToImage(img) {
+      const wrapper = document.querySelector(".canvas-wrapper");
+      if (!wrapper) {
+        lineCanvas.width = drawCanvas.width = 800;
+        lineCanvas.height = drawCanvas.height = 600;
         return;
       }
-      const { x, y } = getPos(e);
-      const mode = modeSelect.value;
 
-      if (mode === "brush") {
-        isDrawing = true;
+      const maxW = Math.max(260, wrapper.clientWidth - 36); // Account for 18px padding
+      const maxH = Math.max(260, wrapper.clientHeight - 36);
+
+      const ratio = Math.min(maxW / img.width, maxH / img.height);
+      const w = Math.max(260, Math.floor(img.width * ratio));
+      const h = Math.max(260, Math.floor(img.height * ratio));
+
+      lineCanvas.width = w;
+      lineCanvas.height = h;
+      drawCanvas.width = w;
+      drawCanvas.height = h;
+
+      // Reset styles for positioning
+      lineCanvas.style.width = `${w}px`;
+      lineCanvas.style.height = `${h}px`;
+      drawCanvas.style.width = `${w}px`;
+      drawCanvas.style.height = `${h}px`;
+
+      console.log("[CC] canvas resized:", w, "x", h);
+    }
+
+    function loadPage(src, resetUndo) {
+      console.log("[CC] loadPage:", src, "resetUndo:", resetUndo);
+      const img = new Image();
+      // Enable CORS for potential external images (optional but good practice)
+      img.crossOrigin = "Anonymous";
+
+      img.onload = () => {
+        resizeCanvasToImage(img);
+
+        lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+        lineCtx.drawImage(img, 0, 0, lineCanvas.width, lineCanvas.height);
+
+        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+
+        undoStack = [];
+        if (resetUndo) saveState();
+      };
+
+      img.onerror = () => {
+        console.error("[CC] ERROR loading image:", src);
+        lineCanvas.width = 480;
+        lineCanvas.height = 320;
+        drawCanvas.width = 480;
+        drawCanvas.height = 320;
+        lineCtx.clearRect(0, 0, 480, 320);
+        lineCtx.fillStyle = "#fee2e2";
+        lineCtx.fillRect(0, 0, 480, 320);
+        lineCtx.fillStyle = "#b91c1c";
+        lineCtx.font = "14px system-ui";
+        lineCtx.fillText("Image not found:", 16, 40);
+        lineCtx.fillText(src, 16, 64);
+      };
+
+      img.src = src;
+    }
+
+    // ===== STATE SAVE / RESTORE =====
+    function saveState() {
+      if (!drawCanvas.width || !drawCanvas.height) return;
+      if (undoStack.length >= MAX_UNDO) undoStack.shift();
+      undoStack.push(drawCanvas.toDataURL("image/png"));
+    }
+
+    function restoreState() {
+      if (undoStack.length <= 1) {
+        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        undoStack = ["transparent"]; // Reset stack but keep a baseline state
+        return;
+      }
+      undoStack.pop();
+      const url = undoStack[undoStack.length - 1];
+      const img = new Image();
+      img.onload = () => {
+        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        drawCtx.drawImage(img, 0, 0);
+      };
+      img.src = url;
+    }
+
+    // ===== DRAWING / FILL / EYEDROPPER =====
+    function setupCanvasEvents() {
+      const getPos = (e) => {
+        const rect = drawCanvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          // Map client coordinates to canvas pixel coordinates
+          x: ((clientX - rect.left) / rect.width) * drawCanvas.width,
+          y: ((clientY - rect.top) / rect.height) * drawCanvas.height
+        };
+      };
+
+      const start = (e) => {
+        e.preventDefault();
+        if (!drawCanvas.width) {
+          console.warn("[CC] drawCanvas has zero size, ignoring action");
+          return;
+        }
+        const { x, y } = getPos(e);
+        const mode = currentMode;
+
+        if (mode === "brush") {
+          isDrawing = true;
+          lastX = x;
+          lastY = y;
+          drawCtx.lineCap = "round";
+          drawCtx.lineJoin = "round";
+          drawCtx.strokeStyle = currentColor;
+          drawCtx.lineWidth = parseInt(brushSizeInput.value, 10);
+        } else if (mode === "fill") {
+          floodFill(x, y, currentColor);
+          saveState();
+        } else if (mode === "eyedropper") {
+          eyedropper(x, y);
+        }
+      };
+
+      const move = (e) => {
+        if (!isDrawing || currentMode !== "brush") return;
+        e.preventDefault();
+        const { x, y } = getPos(e);
+        drawCtx.beginPath();
+        drawCtx.moveTo(lastX, lastY);
+        drawCtx.lineTo(x, y);
+        drawCtx.stroke();
         lastX = x;
         lastY = y;
-        drawCtx.lineCap = "round";
-        drawCtx.lineJoin = "round";
-        drawCtx.strokeStyle = currentColor;
-        drawCtx.lineWidth = parseInt(brushSizeInput.value, 10);
-      } else {
-        floodFill(x, y, currentColor);
+      };
+
+      const end = () => {
+        if (isDrawing && currentMode === "brush") {
+          isDrawing = false;
+          saveState();
+        }
+      };
+
+      ["mousedown", "touchstart"].forEach(ev =>
+        drawCanvas.addEventListener(ev, start, { passive: false })
+      );
+      ["mousemove", "touchmove"].forEach(ev =>
+        drawCanvas.addEventListener(ev, move, { passive: false })
+      );
+      ["mouseup", "mouseleave", "touchend", "touchcancel"].forEach(ev =>
+        drawCanvas.addEventListener(ev, end)
+      );
+
+      undoBtn.addEventListener("click", restoreState);
+      clearBtn.addEventListener("click", () => {
+        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        undoStack = [];
         saveState();
-      }
-    };
-
-    const move = (e) => {
-      if (!isDrawing) return;
-      e.preventDefault();
-      const { x, y } = getPos(e);
-      drawCtx.beginPath();
-      drawCtx.moveTo(lastX, lastY);
-      drawCtx.lineTo(x, y);
-      drawCtx.stroke();
-      lastX = x;
-      lastY = y;
-    };
-
-    const end = () => {
-      if (isDrawing) {
-        isDrawing = false;
-        saveState();
-      }
-    };
-
-    ["mousedown", "touchstart"].forEach(ev =>
-      drawCanvas.addEventListener(ev, start, { passive: false })
-    );
-    ["mousemove", "touchmove"].forEach(ev =>
-      drawCanvas.addEventListener(ev, move, { passive: false })
-    );
-    ["mouseup", "mouseleave", "touchend", "touchcancel"].forEach(ev =>
-      drawCanvas.addEventListener(ev, end)
-    );
-
-    undoBtn.addEventListener("click", restoreState);
-    clearBtn.addEventListener("click", () => {
-      drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
-      undoStack = [];
-      saveState();
-    });
-    downloadBtn.addEventListener("click", downloadArtwork);
-  }
-
-  function hexToRgb(hex) {
-    hex = hex.replace("#", "");
-    if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
-    const num = parseInt(hex, 16);
-    return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
-  }
-
-function floodFill(startX, startY, fillColor) {
-  const w = drawCanvas.width;
-  const h = drawCanvas.height;
-  if (!w || !h) return;
-
-  const temp = document.createElement("canvas");
-  temp.width = w;
-  temp.height = h;
-  const tctx = temp.getContext("2d");
-
-  // Composite (used only for region detection)
-  tctx.drawImage(lineCanvas, 0, 0);
-  tctx.drawImage(drawCanvas, 0, 0);
-
-  const imgData = tctx.getImageData(0, 0, w, h);
-  const data = imgData.data;
-
-  const sx = Math.floor(startX);
-  const sy = Math.floor(startY);
-  const startIdx = (sy * w + sx) * 4;
-
-  const target = {
-    r: data[startIdx],
-    g: data[startIdx + 1],
-    b: data[startIdx + 2],
-    a: data[startIdx + 3]
-  };
-
-  const isLinePixel = (idx) => {
-    const r = data[idx];
-    const g = data[idx + 1];
-    const b = data[idx + 2];
-    const a = data[idx + 3];
-    // treat dark, opaque pixels as line art (walls)
-    return a > 200 && r < 60 && g < 60 && b < 60;
-  };
-
-  // If clicked directly on a line, ignore
-  if (isLinePixel(startIdx)) return;
-
-  const [fr, fg, fb] = hexToRgb(fillColor);
-
-  // Small tolerance so anti-aliased edges fill nicely
-  const TOL = 16;
-  const match = (idx) => {
-    const r = data[idx];
-    const g = data[idx + 1];
-    const b = data[idx + 2];
-    const a = data[idx + 3];
-    return (
-      Math.abs(r - target.r) <= TOL &&
-      Math.abs(g - target.g) <= TOL &&
-      Math.abs(b - target.b) <= TOL &&
-      Math.abs(a - target.a) <= TOL
-    );
-  };
-
-  if (!match(startIdx)) return;
-
-  const stack = [[sx, sy]];
-
-  while (stack.length) {
-    const [x, y] = stack.pop();
-    if (x < 0 || x >= w || y < 0 || y >= h) continue;
-
-    const idx = (y * w + x) * 4;
-    if (!match(idx) || isLinePixel(idx)) continue;
-
-    // Set fill color
-    data[idx] = fr;
-    data[idx + 1] = fg;
-    data[idx + 2] = fb;
-    data[idx + 3] = 255;
-
-    stack.push([x + 1, y]);
-    stack.push([x - 1, y]);
-    stack.push([x, y + 1]);
-    stack.push([x, y - 1]);
-  }
-
-  // Remove line-art pixels from this layer so outlines stay crisp
-  for (let i = 0; i < data.length; i += 4) {
-    if (isLinePixel(i)) {
-      data[i + 3] = 0; // transparent on draw layer
+      });
+      downloadBtn.addEventListener("click", downloadArtwork);
     }
-  }
 
-  // Paint only the fill result onto drawCanvas
-  drawCtx.clearRect(0, 0, w, h);
-  drawCtx.putImageData(imgData, 0, 0);
-}
+    // Helper: RGB to Hex
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b].map(x => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+      }).join('');
+    }
+
+    // Helper: Hex to RGB
+    function hexToRgb(hex) {
+      hex = hex.replace("#", "");
+      if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
+      const num = parseInt(hex, 16);
+      return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+    }
+
+    // New Feature: Eyedropper
+    function eyedropper(x, y) {
+      const w = drawCanvas.width;
+      const h = drawCanvas.height;
+      if (!w || !h) return;
+
+      // Create temporary composite canvas to read pixel from
+      const temp = document.createElement("canvas");
+      temp.width = w;
+      temp.height = h;
+      const tctx = temp.getContext("2d");
+
+      // Draw both layers (line art and colored art)
+      tctx.drawImage(lineCanvas, 0, 0);
+      tctx.drawImage(drawCanvas, 0, 0);
+
+      const imgData = tctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
+
+      const sx = Math.floor(x);
+      const sy = Math.floor(y);
+      const startIdx = (sy * w + sx) * 4;
+
+      const r = data[startIdx];
+      const g = data[startIdx + 1];
+      const b = data[startIdx + 2];
+      const a = data[startIdx + 3];
+
+      // Convert sampled color to Hex
+      const sampledColor = rgbToHex(r, g, b);
+
+      // If the sampled color is mostly transparent (background), ignore
+      if (a < 50) return;
+
+      // Set the new current color
+      currentColor = sampledColor;
+      console.log("[CC] Eyedropper sampled color:", sampledColor);
+
+      // Update UI
+      // 1. Check if color exists in palette
+      // 1. Check if color exists in palette
+      const sampledRGB = toRgbString(sampledColor); // sampledColor is #hex from rgbToHex(..)
+      let matchedSwatch = [...paletteContainer.children].find(sw => {
+        return toRgbString(sw.style.backgroundColor) === sampledRGB;
+      });
+
+      if (matchedSwatch) {
+        currentColor = sampledColor; // keep hex as working color
+        updateActiveColorSwatch(matchedSwatch);
+      } else {
+        customColorInput.value = sampledColor;               // sync picker
+        customColorDisplay.style.backgroundColor = sampledColor;
+        currentColor = sampledColor;
+        updateActiveColorSwatch(null);
+      }
+      setMode("brush");
+    }
 
 
-  // ===== DOWNLOAD =====
-  function downloadArtwork() {
-    if (!lineCanvas.width) return;
-    const w = lineCanvas.width;
-    const h = lineCanvas.height;
+    function floodFill(startX, startY, fillColor) {
+      const w = drawCanvas.width;
+      const h = drawCanvas.height;
+      if (!w || !h) return;
 
-    const out = document.createElement("canvas");
-    out.width = w;
-    out.height = h;
-    const octx = out.getContext("2d");
+      const temp = document.createElement("canvas");
+      temp.width = w;
+      temp.height = h;
+      const tctx = temp.getContext("2d");
 
-    octx.fillStyle = "#ffffff";
-    octx.fillRect(0, 0, w, h);
-    octx.drawImage(lineCanvas, 0, 0);
-    octx.drawImage(drawCanvas, 0, 0);
+      // Composite (used only for region detection)
+      // Draw line art first, then colored art to get the total canvas state
+      tctx.drawImage(lineCanvas, 0, 0);
+      tctx.drawImage(drawCanvas, 0, 0);
 
-    const link = document.createElement("a");
-    link.download = "creative-cubs-coloring.png";
-    link.href = out.toDataURL("image/png");
-    link.click();
-  }
+      const imgData = tctx.getImageData(0, 0, w, h);
+      const data = imgData.data;
 
-  init();
-</script>
+      const sx = Math.floor(startX);
+      const sy = Math.floor(startY);
+      const startIdx = (sy * w + sx) * 4;
+
+      const target = {
+        r: data[startIdx],
+        g: data[startIdx + 1],
+        b: data[startIdx + 2],
+        a: data[startIdx + 3]
+      };
+
+      const isLinePixel = (idx) => {
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const a = data[idx + 3];
+        // treat dark, opaque pixels as line art (walls)
+        return a > 200 && r < 40 && g < 40 && b < 40; // Reduced tolerance for lines
+      };
+
+      // If clicked directly on a line, ignore
+      if (isLinePixel(startIdx)) return;
+
+      const [fr, fg, fb] = hexToRgb(fillColor);
+
+      // Small tolerance so anti-aliased edges fill nicely
+      const TOL = 24; // Increased tolerance for smoother filling
+      const match = (idx) => {
+        const r = data[idx];
+        const g = data[idx + 1];
+        const b = data[idx + 2];
+        const a = data[idx + 3];
+        // Also check that we are not trying to fill a region that is already the fill color
+        const isTargetFill = (
+          Math.abs(r - fr) <= TOL &&
+          Math.abs(g - fg) <= TOL &&
+          Math.abs(b - fb) <= TOL
+        );
+
+        return (
+          !isTargetFill && // Don't re-fill
+          Math.abs(r - target.r) <= TOL &&
+          Math.abs(g - target.g) <= TOL &&
+          Math.abs(b - target.b) <= TOL &&
+          Math.abs(a - target.a) <= TOL
+        );
+      };
+
+      if (!match(startIdx)) return;
+
+      const stack = [[sx, sy]];
+
+      while (stack.length) {
+        const [x, y] = stack.pop();
+        if (x < 0 || x >= w || y < 0 || y >= h) continue;
+
+        const idx = (y * w + x) * 4;
+        if (!match(idx) || isLinePixel(idx)) continue;
+
+        // Set fill color on temporary data
+        data[idx] = fr;
+        data[idx + 1] = fg;
+        data[idx + 2] = fb;
+        data[idx + 3] = 255;
+
+        // Check neighbors
+        stack.push([x + 1, y]);
+        stack.push([x - 1, y]);
+        stack.push([x, y + 1]);
+        stack.push([x, y - 1]);
+      }
+
+      // Re-read existing drawn pixels from drawCanvas
+      drawCtx.globalCompositeOperation = 'source-over';
+      drawCtx.putImageData(imgData, 0, 0);
+
+      // Restore original image data from drawCanvas for the putImageData call 
+      // to only contain the filled region (and existing draw content)
+      const finalImgData = drawCtx.getImageData(0, 0, w, h);
+      const finalData = finalImgData.data;
+
+      // Final cleanup: set line pixels to transparent on the draw layer
+      // This is a complex logic step, for simplification, we just ensure 
+      // line art remains visible by having drawCtx be transparent where lines are.
+      // The line layer (lineCanvas) handles the actual lines.
+
+      // Paint the result onto drawCanvas
+      drawCtx.clearRect(0, 0, w, h);
+      drawCtx.putImageData(finalImgData, 0, 0);
+    }
+
+    // Normalize any CSS color (#hex or rgb/rgba) to [r,g,b]
+    function parseColorToRGB(color) {
+      if (!color) return [0, 0, 0];
+      color = String(color).trim();
+
+      if (color.startsWith('#')) {
+        return hexToRgb(color);
+      }
+      // rgb/rgba(...)
+      const m = color.match(/rgba?\((\d+)[,\s]+(\d+)[,\s]+(\d+)/i);
+      if (m) return [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)];
+      // Fallback via canvas if needed
+      const c = document.createElement('canvas');
+      c.width = c.height = 1;
+      const ctx = c.getContext('2d');
+      try { ctx.fillStyle = color; } catch { return [0, 0, 0]; }
+      ctx.fillRect(0, 0, 1, 1);
+      const d = ctx.getImageData(0, 0, 1, 1).data;
+      return [d[0], d[1], d[2]];
+    }
+
+    function toRgbString(color) {
+      const [r, g, b] = parseColorToRGB(color);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    // ===== DOWNLOAD =====
+    function downloadArtwork() {
+      if (!lineCanvas.width) return;
+      const w = lineCanvas.width;
+      const h = lineCanvas.height;
+
+      const out = document.createElement("canvas");
+      out.width = w;
+      out.height = h;
+      const octx = out.getContext("2d");
+
+      // 1. Draw solid white background
+      octx.fillStyle = "#ffffff";
+      octx.fillRect(0, 0, w, h);
+
+      // 2. Draw user coloring/filling
+      octx.drawImage(drawCanvas, 0, 0);
+
+      // 3. Draw line art on top
+      octx.drawImage(lineCanvas, 0, 0);
+
+      // Set a meaningful filename
+      const filename = (currentPage ? currentPage.label.replace(/\s/g, '-') : "artwork") + ".png";
+
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = out.toDataURL("image/png");
+      link.click();
+    }
+
+    init();
+  </script>
 
 
 </body>
+
 </html>
