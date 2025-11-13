@@ -611,6 +611,132 @@
         min-height: 38px;
       }
     }
+
+    /* --- NEW: Ad containers with reserved space (prevents layout shift) --- */
+    .ad-slot {
+      background: #fafafa;
+      border: 1px dashed #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .03) inset;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      font-size: 13px;
+    }
+
+    /* Top banner (desktop & mobile). Reserve height so no CLS. */
+    .ad-top {
+      height: 90px;
+      /* desktop */
+      min-height: 90px;
+      margin: 12px 30px 0 30px;
+      /* matches your layout padding */
+    }
+
+    @media (max-width: 900px) {
+      .ad-top {
+        height: 60px;
+        min-height: 60px;
+        margin: 8px 16px 0 16px;
+      }
+    }
+
+    /* Native unit in sidebar */
+    .ad-native {
+      height: 120px;
+      min-height: 120px;
+      margin-top: 10px;
+    }
+
+    /* Sticky footer (mobile only) */
+    .ad-sticky {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 60px;
+      min-height: 60px;
+      z-index: 60;
+      margin: 0;
+      border-radius: 0;
+      border-left: 0;
+      border-right: 0;
+      border-bottom: 0;
+      display: none;
+      /* JS toggles on mobile */
+    }
+
+    @media (max-width: 900px) {
+      .ad-sticky {
+        display: flex;
+      }
+
+      body {
+        padding-bottom: 60px;
+      }
+
+      /* keep content above sticky */
+    }
+
+    /* Interstitial overlay */
+    .ad-interstitial-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .ad-interstitial {
+      width: min(90vw, 640px);
+      height: min(75vh, 480px);
+      background: #fff;
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .ad-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: #111827;
+      color: #fff;
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      opacity: .85;
+    }
+
+    .ad-close[disabled] {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .ad-caption {
+      position: absolute;
+      bottom: 8px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    /* Hide ads in focus mode for clean UX */
+    .focus-mode .ad-top,
+    .focus-mode .ad-sticky {
+      display: none !important;
+    }
   </style>
 </head>
 
@@ -623,6 +749,12 @@
     </div>
   </header>
 
+  <!-- NEW: Top banner slot (safe, non-intrusive) -->
+  <div id="adTop" class="ad-slot ad-top">
+    <!-- PASTE YOUR ADSENSE TAG HERE (e.g., 728x90/Responsive) -->
+    <span>Top Banner (placeholder)</span>
+  </div>
+
   <main class="app">
     <aside class="sidebar">
       <div>
@@ -633,6 +765,12 @@
       <div>
         <div class="sidebar-title">2. Pick a Page</div>
         <div class="thumbs" id="thumbsContainer"></div>
+      </div>
+
+      <!-- NEW: Native ad in sidebar (blends with content) -->
+      <div id="adNative" class="ad-slot ad-native">
+        <!-- PASTE YOUR NATIVE/TEXT ADS TAG HERE -->
+        <span>Native (placeholder)</span>
       </div>
 
       <div class="hint">
@@ -696,6 +834,22 @@
       </div>
     </section>
   </main>
+
+  <!-- NEW: Sticky footer banner (mobile only) -->
+  <div id="adSticky" class="ad-slot ad-sticky">
+    <!-- PASTE YOUR MOBILE RESPONSIVE BANNER HERE -->
+    <span>Sticky Mobile Banner (placeholder)</span>
+  </div>
+
+  <!-- NEW: Interstitial overlay -->
+  <div id="adModal" class="ad-interstitial-backdrop" aria-hidden="true">
+    <div class="ad-interstitial" role="dialog" aria-label="Sponsored">
+      <!-- PASTE YOUR INTERSTITIAL TAG HERE -->
+      <div class="ad-slot" style="width:100%;height:100%;border:none">Interstitial (placeholder)</div>
+      <button id="adCloseBtn" class="ad-close" disabled>Close (3)</button>
+      <div class="ad-caption">Sponsored</div>
+    </div>
+  </div>
 
   <script>
     let hasColored = false;
@@ -789,6 +943,56 @@
     let focusMode = false;
 
     let canvasCssW = 0, canvasCssH = 0, canvasDpr = 1;
+
+    /* ---------- SESSION AD STATE ---------- */
+    const isMobile = () => window.matchMedia("(max-width: 900px)").matches;
+
+    // Count how many *distinct* page loads the user triggers
+    let pageChangeCount = 0;
+    let lastPageId = null;
+
+    // Interstitial policy
+    const INTERSTITIAL_EVERY_N = 4;   // after every 4th page change
+    const INTERSTITIAL_MAX_PER_SESSION = 1;
+    let interstitialShown = 0;
+
+    // DOM refs
+    const adModal = document.getElementById("adModal");
+    const adCloseBtn = document.getElementById("adCloseBtn");
+    const adSticky = document.getElementById("adSticky");
+
+    // Show sticky only on mobile, but hide in focus mode (CSS handles most)
+    function updateStickyVisibility() {
+      adSticky.style.display = isMobile() ? "flex" : "none";
+    }
+    updateStickyVisibility();
+    window.addEventListener("resize", updateStickyVisibility);
+
+
+    function showInterstitial() {
+      interstitialShown++;
+      adModal.style.display = "flex";
+      adModal.setAttribute("aria-hidden", "false");
+
+      // 3-second countdown before close is enabled (soft gate)
+      let remaining = 3;
+      adCloseBtn.disabled = true;
+      adCloseBtn.textContent = `Close (${remaining})`;
+      const t = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(t);
+          adCloseBtn.disabled = false;
+          adCloseBtn.textContent = "Close";
+        } else {
+          adCloseBtn.textContent = `Close (${remaining})`;
+        }
+      }, 1000);
+    }
+    adCloseBtn.addEventListener("click", () => {
+      adModal.style.display = "none";
+      adModal.setAttribute("aria-hidden", "true");
+    });
 
     async function fetchManifestWithCache() {
       // Try cache
@@ -976,7 +1180,6 @@
     }
 
     function selectCategory(cat) {
-      //console.log("[CC] selectCategory:", cat);
       currentCategory = cat;
 
       [...categoryList.children].forEach(b =>
@@ -992,18 +1195,19 @@
         div.dataset.id = page.id;
 
         const img = document.createElement("img");
-        img.src = page.src;
+        // If you have thumbs, prefer them here:
+        img.src = page.thumb || page.src;
         img.alt = page.label;
         img.loading = "lazy";
         div.appendChild(img);
 
         div.addEventListener("click", () => {
-          //console.log("[CC] thumb click:", page.src);
           [...thumbsContainer.children].forEach(t =>
             t.classList.toggle("active", t === div)
           );
           currentPage = page;
-          loadPage(page.src, true);
+          // ⬇️ pass the page object so the wrapper can count distinct changes
+          loadPage(page.src, true, page);
         });
 
         thumbsContainer.appendChild(div);
@@ -1014,7 +1218,8 @@
       });
 
       if (pages[0]) {
-        loadPage(pages[0].src, true);
+        // ⬇️ initial load should NOT count as a change; the wrapper handles that
+        loadPage(pages[0].src, true, pages[0]);
       }
     }
 
@@ -1135,6 +1340,41 @@
 
 
     }
+
+    // ---- Interstitial counters/state ----
+
+    // Provide showInterstitial() from your ad code (or use a no-op fallback)
+    function maybeShowInterstitial() {
+      if (interstitialShown >= INTERSTITIAL_MAX_PER_SESSION) return;
+      if (pageChangeCount > 0 && pageChangeCount % INTERSTITIAL_EVERY_N === 0) {
+        interstitialShown++;
+        showInterstitial();
+      }
+    }
+
+    // ---- Wrap the real loadPage ----
+    if (typeof loadPage === "function") {
+      const __origLoadPage = loadPage;
+
+      window.loadPage = function (src, resetUndo, pageObj) {
+        try {
+          const nextId = (pageObj && pageObj.id) || src;
+
+          if (lastPageId === null) {
+            // First ever load in this session → set baseline, do NOT count
+            lastPageId = nextId;
+          } else if (nextId && nextId !== lastPageId) {
+            // Real user-initiated change
+            lastPageId = nextId;
+            pageChangeCount++;
+            maybeShowInterstitial();
+          }
+        } catch (e) { /* non-fatal */ }
+
+        return __origLoadPage(src, resetUndo);
+      };
+    }
+
 
     // ===== STATE SAVE / RESTORE =====
     function saveState() {
