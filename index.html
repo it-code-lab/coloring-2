@@ -753,6 +753,7 @@
     const toggleToolsBtn = document.getElementById("toggleToolsBtn");
     const focusBtn = document.getElementById("focusBtn");
     const fsBtn = document.getElementById("fsBtn");
+    let currentLineImage = null;  // cache the Image used for the current page
 
     // ===== STATE =====
     let currentCategory = Object.keys(COLORING_PAGES)[0];
@@ -786,7 +787,8 @@
       updateActiveColorSwatch(null);
 
       window.addEventListener("resize", () => {
-        if (currentPage) loadPage(currentPage.src, false);
+        // if (currentPage) loadPage(currentPage.src, false);
+        if (currentPage) relayoutKeepingProgress();
       });
 
       setupToolModeEvents();
@@ -805,7 +807,8 @@
       thumbsEl.classList.toggle("horizontal", mqlMobile.matches);
 
       // Refit current page to new space
-      if (currentPage) loadPage(currentPage.src, false);
+      // if (currentPage) loadPage(currentPage.src, false);
+      if (currentPage) relayoutKeepingProgress();
     }
 
 
@@ -823,7 +826,8 @@
         toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Tools';
       }
       // Refit canvas to new available space
-      if (currentPage) loadPage(currentPage.src, false);
+      // if (currentPage) loadPage(currentPage.src, false);
+      if (currentPage) relayoutKeepingProgress();
     }
 
     function setFocusMode(on) {
@@ -837,7 +841,8 @@
         focusBtn.title = "Focus Mode (hide sidebar)";
         focusBtn.innerHTML = '<i class="fas fa-maximize"></i> Focus';
       }
-      if (currentPage) loadPage(currentPage.src, false);
+      // if (currentPage) loadPage(currentPage.src, false);
+      if (currentPage) relayoutKeepingProgress();
     }
 
     async function toggleFullscreen() {
@@ -1019,6 +1024,7 @@
       img.crossOrigin = "Anonymous";
 
       img.onload = () => {
+        currentLineImage = img;  
         resizeCanvasToImage(img);
 
         // lineCtx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
@@ -1032,6 +1038,13 @@
 
         undoStack = [];
         if (resetUndo) saveState();
+        if (checkIfCanvasEmpty()) {
+          downloadBtn.classList.remove("active");
+          hasColored = false;
+        } else {
+          downloadBtn.classList.add("active");
+          hasColored = true;
+        }        
       };
 
       img.onerror = () => {
@@ -1051,13 +1064,7 @@
 
       img.src = src;
 
-      if (checkIfCanvasEmpty()) {
-        downloadBtn.classList.remove("active");
-        hasColored = false;
-      } else {
-        downloadBtn.classList.add("active");
-        hasColored = true;
-      }
+
     }
 
     // ===== STATE SAVE / RESTORE =====
@@ -1186,6 +1193,42 @@
         return hex.length === 1 ? '0' + hex : hex;
       }).join('');
     }
+
+    function relayoutKeepingProgress() {
+  if (!currentLineImage) return;  // nothing loaded yet
+
+  // 1) Snapshot the current colored layer (device-pixel size)
+  let snapshot = null;
+  if (drawCanvas.width && drawCanvas.height) {
+    snapshot = document.createElement("canvas");
+    snapshot.width  = drawCanvas.width;
+    snapshot.height = drawCanvas.height;
+    snapshot.getContext("2d").drawImage(drawCanvas, 0, 0);
+  }
+
+  // 2) Resize canvases to new wrapper size based on the same line image
+  resizeCanvasToImage(currentLineImage);
+
+  // 3) Redraw line art at CSS size
+  lineCtx.clearRect(0, 0, canvasCssW, canvasCssH);
+  lineCtx.drawImage(currentLineImage, 0, 0, canvasCssW, canvasCssH);
+
+  // 4) Restore the colored layer, scaled to the new CSS size
+  drawCtx.clearRect(0, 0, canvasCssW, canvasCssH);
+  if (snapshot) {
+    drawCtx.drawImage(snapshot, 0, 0, canvasCssW, canvasCssH);
+  }
+
+  // 5) Don’t touch undoStack — user progress remains.
+  //    Refresh download button state
+  if (checkIfCanvasEmpty()) {
+    downloadBtn.classList.remove("active");
+    hasColored = false;
+  } else {
+    downloadBtn.classList.add("active");
+    hasColored = true;
+  }
+}
 
     // Helper: Hex to RGB
     function hexToRgb(hex) {
