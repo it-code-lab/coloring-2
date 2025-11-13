@@ -257,6 +257,18 @@
       gap: 6px;
     }
 
+    /* --- Smoothly fade in/out the Download button --- */
+    #downloadBtn {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    #downloadBtn.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
     .color-swatch {
       width: 24px;
       /* Larger swatch */
@@ -489,7 +501,7 @@
 
         <div class="tool-group">
           <span class="tool-label">Brush Size</span>
-          <input id="brushSize" type="range" min="3" max="50" value="10" />
+          <input id="brushSize" type="range" min="1" max="50" value="5" />
         </div>
 
         <div class="tool-group">
@@ -508,7 +520,7 @@
         </div>
 
         <div class="tool-group" style="margin-left:auto">
-          <button class="btn primary" id="downloadBtn"><i class="fas fa-download"></i> Download Artwork</button>
+          <button id="downloadBtn" class="btn primary" title="Download your finished coloring">Download Artwork</button>
         </div>
       </div>
 
@@ -520,6 +532,12 @@
   </main>
 
   <script>
+    let hasColored = false;
+
+    // Put this near the top if you want an easy toggle & custom text
+    const ADD_COPYRIGHT = true;
+    const COPYRIGHT_TEXT = "© Creative Cubs  |  Personal Use Only";
+
     // ===== CONFIG: your pages =====
     const COLORING_PAGES = {
       "Jungle Safari": [
@@ -585,6 +603,7 @@
       // Set initial custom color
       currentColor = customColorInput.value;
       customColorDisplay.style.backgroundColor = currentColor;
+      updateActiveColorSwatch(null);
 
       window.addEventListener("resize", () => {
         if (currentPage) loadPage(currentPage.src, false);
@@ -773,6 +792,14 @@
       };
 
       img.src = src;
+
+      if (checkIfCanvasEmpty()) {
+        downloadBtn.classList.remove("active");
+        hasColored = false;
+      } else {
+        downloadBtn.classList.add("active");
+        hasColored = true;
+      }
     }
 
     // ===== STATE SAVE / RESTORE =====
@@ -783,9 +810,15 @@
     }
 
     function restoreState() {
+      // console.log("undoStack.length = " + undoStack.length);
+      if (undoStack.length <= 2) {
+        downloadBtn.classList.remove("active");
+        hasColored = false;
+      }
       if (undoStack.length <= 1) {
         drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
         undoStack = ["transparent"]; // Reset stack but keep a baseline state
+
         return;
       }
       undoStack.pop();
@@ -796,6 +829,13 @@
         drawCtx.drawImage(img, 0, 0);
       };
       img.src = url;
+
+      // if (checkIfCanvasEmpty()) {
+      //   downloadBtn.classList.remove("active");
+      // } else {
+      //   downloadBtn.classList.add("active");
+      // }
+
     }
 
     // ===== DRAWING / FILL / EYEDROPPER =====
@@ -846,6 +886,8 @@
         drawCtx.stroke();
         lastX = x;
         lastY = y;
+        downloadBtn.classList.add("active");
+        hasColored = true;
       };
 
       const end = () => {
@@ -870,6 +912,8 @@
         drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
         undoStack = [];
         saveState();
+
+        downloadBtn.classList.remove("active");
       });
       downloadBtn.addEventListener("click", downloadArtwork);
     }
@@ -990,7 +1034,9 @@
       // If clicked directly on a line, ignore
       if (isLinePixel(startIdx)) return;
 
-      const [fr, fg, fb] = hexToRgb(fillColor);
+      // const [fr, fg, fb] = hexToRgb(fillColor);
+      const [fr, fg, fb] = parseColorToRGB(fillColor);
+
 
       // Small tolerance so anti-aliased edges fill nicely
       const TOL = 24; // Increased tolerance for smoother filling
@@ -1056,6 +1102,8 @@
       // Paint the result onto drawCanvas
       drawCtx.clearRect(0, 0, w, h);
       drawCtx.putImageData(finalImgData, 0, 0);
+      downloadBtn.classList.add("active");
+      hasColored = true;
     }
 
     // Normalize any CSS color (#hex or rgb/rgba) to [r,g,b]
@@ -1084,6 +1132,15 @@
       return `rgb(${r}, ${g}, ${b})`;
     }
 
+    function checkIfCanvasEmpty() {
+      const pixels = drawCtx.getImageData(0, 0, drawCanvas.width, drawCanvas.height).data;
+      for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] !== 0) return false; // found a non-transparent pixel
+      }
+      return true;
+    }
+
+
     // ===== DOWNLOAD =====
     function downloadArtwork() {
       if (!lineCanvas.width) return;
@@ -1095,19 +1152,45 @@
       out.height = h;
       const octx = out.getContext("2d");
 
-      // 1. Draw solid white background
+      // 1) White background
       octx.fillStyle = "#ffffff";
       octx.fillRect(0, 0, w, h);
 
-      // 2. Draw user coloring/filling
+      // 2) User coloring
       octx.drawImage(drawCanvas, 0, 0);
 
-      // 3. Draw line art on top
+      // 3) Line art on top
       octx.drawImage(lineCanvas, 0, 0);
 
-      // Set a meaningful filename
-      const filename = (currentPage ? currentPage.label.replace(/\s/g, '-') : "artwork") + ".png";
+      // 4) Copyright footer (clean, subtle, auto-scales)
+      if (ADD_COPYRIGHT) {
+        const padY = Math.round(h * 0.028);              // bottom padding
+        const fontSize = Math.max(12, Math.round(w * 0.024));
+        octx.font = `${fontSize}px system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif`;
+        octx.textAlign = "center";
+        octx.textBaseline = "alphabetic";
 
+        // soft background strip for readability (optional but nice)
+        const metrics = octx.measureText(COPYRIGHT_TEXT);
+        const textW = metrics.width;
+        const stripPadX = Math.round(fontSize * 0.6);
+        const stripPadY = Math.round(fontSize * 0.5);
+        const cx = w / 2;
+        const cy = h - padY;
+
+        octx.fillStyle = "rgba(255,255,255,0.75)";
+        octx.fillRect(cx - textW / 2 - stripPadX, cy - fontSize - stripPadY + 4,
+          textW + stripPadX * 2, fontSize + stripPadY * 2);
+
+        // text with slight shadow
+        octx.shadowColor = "rgba(0,0,0,0.25)";
+        octx.shadowBlur = 2;
+        octx.fillStyle = "rgba(0,0,0,0.65)";
+        octx.fillText(COPYRIGHT_TEXT, cx, cy);
+        octx.shadowBlur = 0;
+      }
+
+      const filename = (currentPage ? currentPage.label.replace(/\s/g, '-') : "artwork") + ".png";
       const link = document.createElement("a");
       link.download = filename;
       link.href = out.toDataURL("image/png");
