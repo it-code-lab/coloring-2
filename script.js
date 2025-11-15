@@ -139,7 +139,19 @@ function sampleBackground(type, A, B) {
         case "linear-tb": return `linear-gradient(180deg, ${A} 0%, ${B} 100%)`;
         case "radial": return `radial-gradient(circle at 50% 50%, ${A} 0%, ${B} 100%)`;
         case "stripe": return `repeating-linear-gradient(135deg, ${A} 0 8px, ${B} 8px 16px)`;
+        // New: softer, thinner stripes
+        case "stripe-soft":
+            return `repeating-linear-gradient(135deg, ${A} 0 4px, ${B} 4px 8px)`;
+
         case "dots": return `radial-gradient(${A} 28%, transparent 29%), radial-gradient(${A} 28%, transparent 29%), ${B}`;
+        // New: softer dots with more spacing
+        case "dots-soft":
+            return `radial-gradient(${A} 18%, transparent 19%), radial-gradient(${A} 18%, transparent 19%), ${B}`;
+
+        // New: soft center glow
+        case "glow":
+            return `radial-gradient(circle at 50% 40%, ${A} 0%, ${A} 35%, ${B} 100%)`;
+
         default: return B;
     }
 }
@@ -1144,52 +1156,97 @@ function applyStyleFill(ctx, style, w, h) {
     const B = style.colorB || "#0ea5e9";
     const type = style.type || "solid";
 
+    // --- SOLID ---
     if (type === "solid") {
-        ctx.fillStyle = style.solidColor || currentColor;
+        ctx.fillStyle = style.solidColor || A;
         ctx.fillRect(0, 0, w, h);
         return;
     }
 
-    if (type === "linear-lr" || type === "linear-tb" || type === "radial") {
+    // --- SIMPLE GRADIENTS ---
+    if (type === "linear-lr" || type === "linear-tb" || type === "radial" || type === "glow") {
         let grad;
-        if (type === "linear-lr") grad = ctx.createLinearGradient(0, 0, w, 0);
-        if (type === "linear-tb") grad = ctx.createLinearGradient(0, 0, 0, h);
-        if (type === "radial") {
+
+        if (type === "linear-lr") {
+            grad = ctx.createLinearGradient(0, 0, w, 0);
+        } else if (type === "linear-tb") {
+            grad = ctx.createLinearGradient(0, 0, 0, h);
+        } else {
+            // radial / glow
             const r = Math.sqrt(w * w + h * h) / 2;
             grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, r);
         }
-        grad.addColorStop(0, A);
-        grad.addColorStop(1, B);
+
+        if (type === "glow") {
+            // softer center glow
+            grad.addColorStop(0.0, A);
+            grad.addColorStop(0.35, A);
+            grad.addColorStop(1.0, B);
+        } else {
+            grad.addColorStop(0, A);
+            grad.addColorStop(1, B);
+        }
+
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
         return;
     }
 
-    if (type === "stripe" || type === "dots") {
+    // --- PATTERN / TEXTURE STYLES ---
+    if (["stripe", "stripe-soft", "dots", "dots-soft"].includes(type)) {
         // small pattern tile
         const tile = document.createElement("canvas");
-        const s = (type === "stripe") ? 16 : 12;
-        tile.width = s; tile.height = s;
+        let s = 16; // default tile size
+
+        if (type === "stripe-soft") s = 12;
+        if (type === "dots-soft") s = 14;
+
+        tile.width = s;
+        tile.height = s;
         const p = tile.getContext("2d");
 
-        if (type === "stripe") {
+        if (type === "stripe" || type === "stripe-soft") {
             // background B
-            p.fillStyle = B; p.fillRect(0, 0, s, s);
+            p.fillStyle = B;
+            p.fillRect(0, 0, s, s);
             // diagonal A
-            p.strokeStyle = A; p.lineWidth = 6;
-            p.beginPath(); p.moveTo(-4, s - 4); p.lineTo(s + 4, -4); p.stroke();
+            p.strokeStyle = A;
+            p.lineWidth = (type === "stripe-soft" ? 3 : 6);
+            p.beginPath();
+            p.moveTo(-4, s - 4);
+            p.lineTo(s + 4, -4);
+            p.stroke();
         } else {
-            // dots: B background with A circles
-            p.fillStyle = B; p.fillRect(0, 0, s, s);
+            // dots / dots-soft: B background with A circles
+            p.fillStyle = B;
+            p.fillRect(0, 0, s, s);
             p.fillStyle = A;
-            p.beginPath(); p.arc(s / 2, s / 2, s * 0.25, 0, Math.PI * 2); p.fill();
+
+            const radius = (type === "dots-soft" ? s * 0.25 : s * 0.35);
+
+            p.beginPath();
+            p.arc(s * 0.3, s * 0.3, radius, 0, Math.PI * 2);
+            p.fill();
+
+            p.beginPath();
+            p.arc(s * 0.8, s * 0.8, radius, 0, Math.PI * 2);
+            p.fill();
         }
-        const pat = ctx.createPattern(tile, "repeat");
-        ctx.fillStyle = pat;
+
+        const pattern = ctx.createPattern(tile, "repeat");
+        ctx.fillStyle = pattern;
         ctx.fillRect(0, 0, w, h);
         return;
     }
+
+    // Fallback: simple linear gradient
+    let grad = ctx.createLinearGradient(0, 0, w, 0);
+    grad.addColorStop(0, A);
+    grad.addColorStop(1, B);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
 }
+
 
 // Normalize any CSS color (#hex or rgb/rgba) to [r,g,b]
 function parseColorToRGB(color) {

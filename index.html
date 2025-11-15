@@ -80,24 +80,25 @@
           </div>
 
           <!-- Blend / Pattern Presets -->
-          <div id="blendPatternPanel" class="blend-panel" role="radiogroup" aria-label="Blend / Pattern Presets">
-            <button class="blend-sample" data-type="solid-a" title="Solid A" aria-label="Solid Color A" role="radio"
-              aria-checked="false"></button>
+<div id="blendPatternPanel" class="blend-pattern-panel">
+  <!-- Solids -->
+  <button class="blend-sample" data-type="solid-a" aria-label="Solid Color A"></button>
 
-            <button class="blend-sample" data-type="linear-lr" title="Linear →" aria-label="Linear left to right"
-              role="radio" aria-checked="false"></button>
-            <button class="blend-sample" data-type="linear-tb" title="Linear ↓" aria-label="Linear top to bottom"
-              role="radio" aria-checked="false"></button>
-            <button class="blend-sample" data-type="radial" title="Radial" aria-label="Radial (A center → B)"
-              role="radio" aria-checked="false"></button>
-            <button class="blend-sample" data-type="stripe" title="Stripes" aria-label="Stripes (A/B)" role="radio"
-              aria-checked="false"></button>
-            <button class="blend-sample" data-type="dots" title="Dots" aria-label="Dots (A on B)" role="radio"
-              aria-checked="false"></button>
-            <button class="blend-sample" data-type="solid-b" title="Solid B" aria-label="Solid Color B" role="radio"
-              aria-checked="false"></button>
 
-          </div>
+  <!-- Gradients -->
+  <button class="blend-sample" data-type="linear-lr" aria-label="Left to Right Gradient"></button>
+  <button class="blend-sample" data-type="linear-tb" aria-label="Top to Bottom Gradient"></button>
+  <button class="blend-sample" data-type="radial" aria-label="Radial Gradient"></button>
+  <button class="blend-sample" data-type="glow" aria-label="Soft Glow"></button>
+
+  <!-- Patterns -->
+  <button class="blend-sample" data-type="stripe" aria-label="Bold Stripes"></button>
+  <button class="blend-sample" data-type="stripe-soft" aria-label="Soft Stripes"></button>
+  <button class="blend-sample" data-type="dots" aria-label="Bold Dots"></button>
+  <button class="blend-sample" data-type="dots-soft" aria-label="Soft Dots"></button>
+  <button class="blend-sample" data-type="solid-b" aria-label="Solid Color B"></button>
+</div>
+
 
         </div>
 
