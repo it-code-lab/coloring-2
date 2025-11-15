@@ -1225,37 +1225,76 @@ function checkIfCanvasEmpty() {
     return true;
 }
 
-
-// ===== DOWNLOAD =====
 function downloadArtwork() {
-    if (!lineCanvas.width) return;
-    const w = lineCanvas.width;
-    const h = lineCanvas.height;
+    if (!drawCanvas || !drawCanvas.width || !drawCanvas.height) {
+        console.warn("[DL] drawCanvas not initialized");
+        return;
+    }
 
+    const w = drawCanvas.width;
+    const h = drawCanvas.height;
+
+    console.log("[DL-DEBUG] Start Download");
+    console.log("[DL-DEBUG] drawCanvas size:", w, "x", h);
+    console.log("[DL-DEBUG] lineCanvas size:", lineCanvas.width, "x", lineCanvas.height);
+
+    // Final output canvas
     const out = document.createElement("canvas");
     out.width = w;
     out.height = h;
     const octx = out.getContext("2d");
 
+    // Reset state
+    octx.setTransform(1, 0, 0, 1, 0, 0);
+    octx.globalCompositeOperation = "source-over";
+    octx.imageSmoothingEnabled = true;
+
     // 1) White background
     octx.fillStyle = "#ffffff";
     octx.fillRect(0, 0, w, h);
 
-    // 2) User coloring
+    // 2) Your colors (brush + fills)
     octx.drawImage(drawCanvas, 0, 0);
+    console.log("[DL-DEBUG] Drew drawCanvas (colors)");
 
-    // 3) Line art on top
-    octx.drawImage(lineCanvas, 0, 0);
+    // 3) Line art on top, but remove white background from lineCanvas
+    if (lineCanvas && lineCanvas.width && lineCanvas.height) {
+        const tmp = document.createElement("canvas");
+        tmp.width = w;
+        tmp.height = h;
+        const tctx = tmp.getContext("2d");
 
-    // 4) Copyright footer (clean, subtle, auto-scales)
+        // Draw the line art into temp canvas
+        tctx.drawImage(lineCanvas, 0, 0, w, h);
+
+        // Make near-white pixels transparent so only lines remain
+        const imgData = tctx.getImageData(0, 0, w, h);
+        const data = imgData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+
+            // Treat almost-white as background
+            if (r > 240 && g > 240 && b > 240) {
+                data[i + 3] = 0; // fully transparent
+            }
+        }
+        tctx.putImageData(imgData, 0, 0);
+
+        // Now draw only the lines
+        octx.drawImage(tmp, 0, 0);
+        console.log("[DL-DEBUG] Drew processed lineCanvas (lines only)");
+    }
+
+    // 4) Optional copyright footer
     if (ADD_COPYRIGHT) {
-        const padY = Math.round(h * 0.028);              // bottom padding
+        const padY = Math.round(h * 0.028);
         const fontSize = Math.max(12, Math.round(w * 0.024));
         octx.font = `${fontSize}px system-ui, -apple-system, Segoe UI, Roboto, Inter, sans-serif`;
         octx.textAlign = "center";
         octx.textBaseline = "alphabetic";
 
-        // soft background strip for readability (optional but nice)
         const metrics = octx.measureText(COPYRIGHT_TEXT);
         const textW = metrics.width;
         const stripPadX = Math.round(fontSize * 0.6);
@@ -1264,10 +1303,13 @@ function downloadArtwork() {
         const cy = h - padY;
 
         octx.fillStyle = "rgba(255,255,255,0.75)";
-        octx.fillRect(cx - textW / 2 - stripPadX, cy - fontSize - stripPadY + 4,
-            textW + stripPadX * 2, fontSize + stripPadY * 2);
+        octx.fillRect(
+            cx - textW / 2 - stripPadX,
+            cy - fontSize - stripPadY + 4,
+            textW + stripPadX * 2,
+            fontSize + stripPadY * 2
+        );
 
-        // text with slight shadow
         octx.shadowColor = "rgba(0,0,0,0.25)";
         octx.shadowBlur = 2;
         octx.fillStyle = "rgba(0,0,0,0.65)";
@@ -1275,12 +1317,57 @@ function downloadArtwork() {
         octx.shadowBlur = 0;
     }
 
-    const filename = (currentPage ? currentPage.label.replace(/\s/g, '-') : "artwork") + ".png";
+    const filename =
+        (currentPage ? currentPage.label.replace(/\s/g, "-") : "artwork") + ".png";
     const link = document.createElement("a");
     link.download = filename;
     link.href = out.toDataURL("image/png");
     link.click();
+
+    console.log("[DL-DEBUG] Download process complete.");
 }
+
+
+
+function downloadArtwork_onlyColors() {
+    if (!drawCanvas || !drawCanvas.width || !drawCanvas.height) {
+        console.warn("[DL] drawCanvas not initialized");
+        return;
+    }
+
+    const w = drawCanvas.width;
+    const h = drawCanvas.height;
+
+    console.log("[DL-DEBUG] Start Download (diagnostic)");
+    console.log("[DL-DEBUG] drawCanvas size:", w, "x", h);
+
+    // Check if there are any non-transparent pixels on drawCanvas
+    try {
+        const imgData = drawCtx.getImageData(0, 0, w, h);
+        const data = imgData.data;
+        let hasNonTransparent = false;
+        for (let i = 3; i < data.length; i += 4) {
+            if (data[i] !== 0) {
+                hasNonTransparent = true;
+                break;
+            }
+        }
+        console.log("[DL-DEBUG] drawCanvas has non-transparent pixels:", hasNonTransparent);
+    } catch (e) {
+        console.warn("[DL-DEBUG] getImageData failed:", e);
+    }
+
+    // 🔴 For now, export ONLY the color layer as-is
+    const filename =
+        (currentPage ? currentPage.label.replace(/\s/g, "-") : "artwork") + ".png";
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = drawCanvas.toDataURL("image/png");
+    link.click();
+
+    console.log("[DL-DEBUG] Download (color-only) complete.");
+}
+
 
 
 [lineCanvas, drawCanvas].forEach(c => {
