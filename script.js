@@ -1209,13 +1209,17 @@ function applyStyleFill(ctx, style, w, h) {
             // background B
             p.fillStyle = B;
             p.fillRect(0, 0, s, s);
-            // diagonal A
-            p.strokeStyle = A;
-            p.lineWidth = (type === "stripe-soft" ? 3 : 6);
+
+            // diagonal filled band with no stroke (no outline seams)
+            p.fillStyle = A;
             p.beginPath();
-            p.moveTo(-4, s - 4);
-            p.lineTo(s + 4, -4);
-            p.stroke();
+            // extend beyond tile edges so pattern repeats seamlessly
+            p.moveTo(-s, s * 0.7);
+            p.lineTo(0, s * 0.3);
+            p.lineTo(s, s * 0.7);
+            p.lineTo(s * 0.4, s + s * 0.1);
+            p.closePath();
+            p.fill();
         } else {
             // dots / dots-soft: B background with A circles
             p.fillStyle = B;
@@ -1246,6 +1250,7 @@ function applyStyleFill(ctx, style, w, h) {
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
 }
+
 
 
 // Normalize any CSS color (#hex or rgb/rgba) to [r,g,b]
@@ -1431,3 +1436,12 @@ function downloadArtwork_onlyColors() {
     c.addEventListener("contextmenu", e => e.preventDefault());
 });
 
+window.addEventListener("load", () => {
+    // Wait until thumbnails are generated
+    setTimeout(() => {
+        const firstThumb = document.querySelector("#categoryList .category-btn");
+        if (firstThumb) {
+            firstThumb.click();
+        }
+    }, 200);
+});
