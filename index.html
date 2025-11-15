@@ -9,6 +9,7 @@
     integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles_resp.css" />
 </head>
 
 <body>
@@ -70,6 +71,11 @@
         </div>
 
         <div class="tool-group">
+          <span class="tool-label">Zoom</span>
+          <input id="zoomRange" type="range" min="50" max="200" value="100" />
+        </div>
+
+        <div class="tool-group">
           <span class="tool-label">Mode</span>
           <button class="mode-btn active" id="modeBrush" data-mode="brush" title="Brush Tool"><i
               class="fas fa-paint-brush"></i></button>
@@ -79,19 +85,21 @@
               class="fas fa-eye-dropper"></i></button>
         </div>
 
-        <div class="tool-group">
+        <!-- <div class="tool-group">
           <button class="btn" id="undoBtn"><i class="fas fa-undo"></i> Undo</button>
           <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>
-        </div>
+        </div> -->
 
-        <div class="tool-group persist" style="margin-left:auto">
+        <div class="tool-group persist" >
+          <button class="btn" id="undoBtn"><i class="fas fa-undo"></i> Undo</button>
+          <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>          
           <button id="toggleToolsBtn" class="btn" title="Hide/Show Tools">
             <i class="fas fa-chevron-up"></i> Hide Tools
           </button>
           <button id="focusBtn" class="btn" title="Focus Mode (hide sidebar)">
             <i class="fas fa-maximize"></i> Focus
           </button>
-          <button id="fsBtn" style="visibility: hidden;" class="btn" title="Fullscreen Canvas">
+          <button id="fsBtn" style="display: none;" class="btn" title="Fullscreen Canvas">
             <i class="fas fa-expand"></i> Fullscreen
           </button>
           <button id="downloadBtn" class="btn primary" title="Download your finished coloring">Download Artwork</button>
@@ -100,9 +108,12 @@
       </div>
 
       <div class="canvas-wrapper">
-        <canvas id="lineCanvas"></canvas>
-        <canvas id="drawCanvas"></canvas>
+        <div id="canvasInner">
+          <canvas id="lineCanvas"></canvas>
+          <canvas id="drawCanvas"></canvas>
+        </div>
       </div>
+
     </section>
   </main>
 
