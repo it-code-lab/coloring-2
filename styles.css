@@ -643,3 +643,10 @@
     #zoomRange {
         min-width: 100px;
     }
+
+#blendGroup .custom-swatch-wrapper { width: 24px; height: 24px; }
+#blendGroup .color-swatch { width: 24px; height: 24px; }
+#blendType { border: 1px solid #e5e7eb; border-radius: 10px; padding: 6px 8px; }
+@media (max-width: 900px){
+  #blendType { font-size: 12px; }
+}

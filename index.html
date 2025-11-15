@@ -65,6 +65,31 @@
           </div>
         </div>
 
+        <!-- Blend & Patterns -->
+        <div class="tool-group" id="blendGroup">
+          <span class="tool-label">Blend / Pattern</span>
+
+          <!-- Color A & B pickers -->
+          <div class="custom-swatch-wrapper" title="Color A">
+            <input type="color" id="blendColorA" value="#10b981" />
+            <div id="blendColorASwatch" class="color-swatch" style="background:#10b981"></div>
+          </div>
+          <div class="custom-swatch-wrapper" title="Color B">
+            <input type="color" id="blendColorB" value="#0ea5e9" />
+            <div id="blendColorBSwatch" class="color-swatch" style="background:#0ea5e9"></div>
+          </div>
+
+          <!-- Presets -->
+          <select id="blendType" title="Gradient / Pattern">
+            <option value="solid">Solid (use selected color)</option>
+            <option value="linear-lr">Linear → (A→B)</option>
+            <option value="linear-tb">Linear ↓ (A→B)</option>
+            <option value="radial">Radial (A center → B)</option>
+            <option value="stripe">Stripes (A/B)</option>
+            <option value="dots">Dots (A on B)</option>
+          </select>
+        </div>
+
         <div class="tool-group">
           <span class="tool-label">Brush Size</span>
           <input id="brushSize" type="range" min="1" max="50" value="5" />
