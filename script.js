@@ -75,7 +75,7 @@ let currentLineImage = null;  // cache the Image used for the current page
 let currentCategory = Object.keys(COLORING_PAGES)[0];
 let currentPage = null;
 let currentColor = PALETTE_COLORS[5]; // Default to a nice green
-let currentMode = "brush";
+let currentMode = "fill";
 let isDrawing = false;
 let lastX = 0, lastY = 0;
 let undoStack = [];
