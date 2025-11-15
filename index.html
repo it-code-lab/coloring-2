@@ -53,11 +53,11 @@
 
     <section class="main">
       <div class="toolbar">
-        <div class="tool-group">
+        <div class="tool-group" data-role="palette">
           <span class="tool-label">Color Palette</span>
           <div id="palette"></div>
         </div>
-        <div class="tool-group">
+        <div class="tool-group" data-role="custom">
           <span class="tool-label">Custom</span>
           <div class="custom-swatch-wrapper">
             <input type="color" id="customColor" value="#10b981" />
@@ -70,24 +70,35 @@
           <span class="tool-label">Blend / Pattern</span>
 
           <!-- Color A & B pickers -->
-          <div class="custom-swatch-wrapper" title="Color A">
+          <div class="custom-swatch-wrapper" title="A">
             <input type="color" id="blendColorA" value="#10b981" />
             <div id="blendColorASwatch" class="color-swatch" style="background:#10b981"></div>
           </div>
-          <div class="custom-swatch-wrapper" title="Color B">
+          <div class="custom-swatch-wrapper" title="B">
             <input type="color" id="blendColorB" value="#0ea5e9" />
             <div id="blendColorBSwatch" class="color-swatch" style="background:#0ea5e9"></div>
           </div>
 
-          <!-- Presets -->
-          <select id="blendType" title="Gradient / Pattern">
-            <option value="solid">Solid (use selected color)</option>
-            <option value="linear-lr">Linear → (A→B)</option>
-            <option value="linear-tb">Linear ↓ (A→B)</option>
-            <option value="radial">Radial (A center → B)</option>
-            <option value="stripe">Stripes (A/B)</option>
-            <option value="dots">Dots (A on B)</option>
-          </select>
+          <!-- Blend / Pattern Presets -->
+          <div id="blendPatternPanel" class="blend-panel" role="radiogroup" aria-label="Blend / Pattern Presets">
+            <button class="blend-sample" data-type="solid-a" title="Solid A" aria-label="Solid Color A" role="radio"
+              aria-checked="false"></button>
+
+            <button class="blend-sample" data-type="linear-lr" title="Linear →" aria-label="Linear left to right"
+              role="radio" aria-checked="false"></button>
+            <button class="blend-sample" data-type="linear-tb" title="Linear ↓" aria-label="Linear top to bottom"
+              role="radio" aria-checked="false"></button>
+            <button class="blend-sample" data-type="radial" title="Radial" aria-label="Radial (A center → B)"
+              role="radio" aria-checked="false"></button>
+            <button class="blend-sample" data-type="stripe" title="Stripes" aria-label="Stripes (A/B)" role="radio"
+              aria-checked="false"></button>
+            <button class="blend-sample" data-type="dots" title="Dots" aria-label="Dots (A on B)" role="radio"
+              aria-checked="false"></button>
+            <button class="blend-sample" data-type="solid-b" title="Solid B" aria-label="Solid Color B" role="radio"
+              aria-checked="false"></button>
+
+          </div>
+
         </div>
 
         <div class="tool-group">
@@ -115,9 +126,9 @@
           <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>
         </div> -->
 
-        <div class="tool-group persist" >
+        <div class="tool-group persist">
           <button class="btn" id="undoBtn"><i class="fas fa-undo"></i> Undo</button>
-          <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>          
+          <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>
           <button id="toggleToolsBtn" class="btn" title="Hide/Show Tools">
             <i class="fas fa-chevron-up"></i> Hide Tools
           </button>
@@ -158,7 +169,7 @@
     </div>
   </div>
 
-<script src=script.js></script>
+  <script src=script.js></script>
 
 </body>
 

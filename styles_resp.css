@@ -1,146 +1,150 @@
-
-
-    /* Make the toolbar always reachable on mobile */
-    @media (max-width: 900px) {
-        .toolbar {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            /* display: flex;
+/* Make the toolbar always reachable on mobile */
+@media (max-width: 900px) {
+    .toolbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        /* display: flex;
             gap: 8px;
             padding: 8px;
             overflow-x: auto;
             white-space: nowrap;
             align-items: flex-start; */
-        }
+    }
 
-        /* Each group is a small vertical pill on mobile */
-        .toolbar .tool-group {
-            /* flex: 0 0 auto;
+    /* Each group is a small vertical pill on mobile */
+    .toolbar .tool-group {
+        /* flex: 0 0 auto;
             flex-direction: column;
             align-items: flex-start;
             gap: 4px; */
-        }
-
-        .tool-label {
-            font-size: 11px;
-        }
-
-        .color-swatch,
-        .custom-swatch-wrapper {
-            width: 28px;
-            height: 28px;
-        }
-
-        .btn,
-        .mode-btn {
-            min-height: 38px;
-        }
-
-        .ad-top {
-            height: 60px;
-            min-height: 60px;
-            margin: 8px 16px 0 16px;
-        }
-
-        .ad-sticky {
-            display: flex;
-        }
-
-        body {
-            padding-bottom: 60px;
-        }
-
-        /* keep content above sticky */
-
-        .app {
-            grid-template-columns: 1fr;
-            padding: 12px;
-            gap: 12px;
-        }
-
-        .sidebar {
-            order: 2;
-            max-height: 35vh;
-            overflow-y: auto;
-        }
-
-        .main {
-            order: 1;
-        }
-
-
-        .canvas-wrapper {
-            height: 60vh;
-        }
-
-
-        .btn,
-        .mode-btn {
-            min-height: 38px;
-        }
-
-        .thumbs.horizontal {
-            display: flex;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            gap: 12px;
-            padding-bottom: 6px;
-        }
-
-        .thumbs.horizontal .thumb {
-            flex: 0 0 24vw;
-            /* big, easy to tap */
-            max-width: 420px;
-            aspect-ratio: 4 / 3;
-        }
-
-
-        .color-swatch,
-        .custom-swatch-wrapper,
-        #customColor,
-        #customColorDisplay {
-            width: 28px;
-            height: 28px;
-        }
     }
 
-    @media (max-width: 600px) {
-        header {
-            padding: 12px 16px;
-        }
-
-        .app {
-            padding: 12px;
-        }
-
-        .toolbar {
-            gap: 10px;
-            padding: 10px;
-        }
-
-        .canvas-wrapper {
-            height: 55vh;
-        }
-
-        .canvas-wrapper {
-            height: 65vh;
-            /* more screen for drawing */
-        }
-
-        .focus-mode .canvas-wrapper {
-            height: calc(100vh - 120px);
-        }
+    .tool-label {
+        font-size: 11px;
     }
 
-    /* Canvas wrapper: let width drive height for landscape */
-    @media (min-width: 901px) {
-        .canvas-wrapper {
-            height: auto;
-            /* width dictates size */
-            max-height: none;
-            aspect-ratio: 16 / 9;
-            /* common landscape canvas */
-        }
+    .color-swatch,
+    .custom-swatch-wrapper {
+        width: 28px;
+        height: 28px;
     }
 
+    .btn,
+    .mode-btn {
+        min-height: 38px;
+    }
+
+    .ad-top {
+        height: 60px;
+        min-height: 60px;
+        margin: 8px 16px 0 16px;
+    }
+
+    .ad-sticky {
+        display: flex;
+    }
+
+    body {
+        padding-bottom: 60px;
+    }
+
+    /* keep content above sticky */
+
+    .app {
+        grid-template-columns: 1fr;
+        padding: 12px;
+        gap: 12px;
+    }
+
+    .sidebar {
+        order: 2;
+        max-height: 35vh;
+        overflow-y: auto;
+    }
+
+    .main {
+        order: 1;
+    }
+
+
+    .canvas-wrapper {
+        height: 60vh;
+    }
+
+
+    .btn,
+    .mode-btn {
+        min-height: 38px;
+    }
+
+    .thumbs.horizontal {
+        display: flex;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 12px;
+        padding-bottom: 6px;
+    }
+
+    .thumbs.horizontal .thumb {
+        flex: 0 0 24vw;
+        /* big, easy to tap */
+        max-width: 420px;
+        aspect-ratio: 4 / 3;
+    }
+
+
+    .color-swatch,
+    .custom-swatch-wrapper,
+    #customColor,
+    #customColorDisplay {
+        width: 28px;
+        height: 28px;
+    }
+}
+
+@media (max-width: 600px) {
+    header {
+        padding: 12px 16px;
+    }
+
+    .app {
+        padding: 12px;
+    }
+
+    .toolbar {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .canvas-wrapper {
+        height: 55vh;
+    }
+
+    .canvas-wrapper {
+        height: 65vh;
+        /* more screen for drawing */
+    }
+
+    .focus-mode .canvas-wrapper {
+        height: calc(100vh - 120px);
+    }
+}
+
+/* Canvas wrapper: let width drive height for landscape */
+@media (min-width: 901px) {
+    .canvas-wrapper {
+        height: auto;
+        /* width dictates size */
+        max-height: none;
+        aspect-ratio: 16 / 9;
+        /* common landscape canvas */
+    }
+}
+
+@media (max-width: 900px) {
+    .blend-sample {
+        width: 38px;
+        height: 24px;
+    }
+}

@@ -111,30 +111,145 @@ const adCloseBtn = document.getElementById("adCloseBtn");
 const adSticky = document.getElementById("adSticky");
 
 // --- Blend controls
-const blendTypeSel = document.getElementById("blendType");
+
 const blendColorAInput = document.getElementById("blendColorA");
 const blendColorBInput = document.getElementById("blendColorB");
 const blendColorASwatch = document.getElementById("blendColorASwatch");
 const blendColorBSwatch = document.getElementById("blendColorBSwatch");
 
-let blendType = "solid";
+
 let blendColorA = blendColorAInput ? blendColorAInput.value : "#10b981";
+
 let blendColorB = blendColorBInput ? blendColorBInput.value : "#0ea5e9";
+let blendType = "linear-lr";
 
-function setupBlendUI(){
-  if (!blendTypeSel) return;
-  blendTypeSel.addEventListener("change", e => { blendType = e.target.value; });
+currentColor = blendColorA;
+// ---- PRESET PANEL ----
+const blendPanel = document.getElementById("blendPatternPanel");
+let presetButtons = [];
+// ---- Blend / Pattern Preset Panel ----
+blendType = typeof blendType !== "undefined" ? blendType : "linear-lr";
 
-  const syncA = v => { blendColorA = v; if (blendColorASwatch) blendColorASwatch.style.background = v; };
-  const syncB = v => { blendColorB = v; if (blendColorBSwatch) blendColorBSwatch.style.background = v; };
 
-  ["input","change"].forEach(ev=>{
-    if (blendColorAInput) blendColorAInput.addEventListener(ev, e=>syncA(e.target.value));
-    if (blendColorBInput) blendColorBInput.addEventListener(ev, e=>syncB(e.target.value));
+function sampleBackground(type, A, B) {
+    switch (type) {
+        case "solid-a": return A;
+        case "solid-b": return B;
+        case "linear-lr": return `linear-gradient(90deg, ${A} 0%, ${B} 100%)`;
+        case "linear-tb": return `linear-gradient(180deg, ${A} 0%, ${B} 100%)`;
+        case "radial": return `radial-gradient(circle at 50% 50%, ${A} 0%, ${B} 100%)`;
+        case "stripe": return `repeating-linear-gradient(135deg, ${A} 0 8px, ${B} 8px 16px)`;
+        case "dots": return `radial-gradient(${A} 28%, transparent 29%), radial-gradient(${A} 28%, transparent 29%), ${B}`;
+        default: return B;
+    }
+}
+
+
+function setBlendType(t) {
+    blendType = t;
+    if (t === "solid-a") currentColor = blendColorA;
+    if (t === "solid-b") currentColor = blendColorB;    
+    renderBlendSamples();
+}
+
+function renderBlendSamples() {
+    if (!blendPanel) return;
+    if (presetButtons.length === 0) {
+        presetButtons = Array.from(blendPanel.querySelectorAll(".blend-sample"));
+        presetButtons.forEach(btn => {
+            btn.addEventListener("click", () => setBlendType(btn.dataset.type));
+            btn.addEventListener("keydown", (e) => {
+                if (e.key === " " || e.key === "Enter") { e.preventDefault(); setBlendType(btn.dataset.type); }
+            });
+        });
+    }
+    const A = blendColorA, B = blendColorB;
+    presetButtons.forEach(btn => {
+        const t = btn.dataset.type;
+        btn.style.background = sampleBackground(t, A, B);
+        const active = (t === blendType);
+        btn.setAttribute("aria-checked", active ? "true" : "false");
+        btn.classList.toggle("is-active", active);
+    });
+}
+
+
+function setupBlendUI() {
+
+
+    const syncA = v => {
+        blendColorA = v;
+        if (blendColorASwatch) blendColorASwatch.style.background = v;
+        currentColor = blendColorA;
+        renderBlendSamples();
+    };
+    const syncB = v => {
+        blendColorB = v;
+        if (blendColorBSwatch) blendColorBSwatch.style.background = v;
+        renderBlendSamples();
+    };
+
+    ["input", "change"].forEach(ev => {
+        if (blendColorAInput) blendColorAInput.addEventListener(ev, e => syncA(e.target.value));
+        if (blendColorBInput) blendColorBInput.addEventListener(ev, e => syncB(e.target.value));
+    });
+
+    // initial paint
+    syncA(blendColorA);
+    syncB(blendColorB);
+    renderBlendSamples();
+    setBlendType(blendType);
+}
+
+// ---------- Quick Palette for Blend Colors ----------
+function setupBlendPalettes() {
+  const popularColors = [
+    "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#00FFFF",
+    "#0000FF", "#8B00FF", "#FFC0CB", "#FFD700", "#FFFFFF",
+    "#000000", "#808080", "#A52A2A", "#228B22", "#6495ED"
+  ];
+
+  const wrappers = [blendColorAInput.parentElement, blendColorBInput.parentElement];
+
+  wrappers.forEach((wrap, idx) => {
+    // ensure relative positioning for palette dropdown
+    wrap.style.position = "relative";
+    const palette = document.createElement("div");
+    palette.className = "blend-palette";
+    popularColors.forEach(col => {
+      const dot = document.createElement("div");
+      dot.className = "color-dot";
+      dot.style.background = col;
+      dot.addEventListener("click", (e) => {
+        // if (idx === 0) blendColorAInput.value = col;
+        // else blendColorBInput.value = col;
+        // blendColorA = blendColorAInput.value;
+        // blendColorB = blendColorBInput.value;
+        // renderBlendSamples();
+        // wrap.classList.remove("open");
+        e.stopPropagation(); // don't toggle the wrapper again        
+        const targetInput = (idx === 0) ? blendColorAInput : blendColorBInput;
+        targetInput.value = col;
+        // fire the same pipeline your color inputs use (updates A/B vars + swatch UI)
+        targetInput.dispatchEvent(new Event("input", { bubbles: true }));
+        wrap.classList.remove("open");        
+      });
+      palette.appendChild(dot);
+    });
+    wrap.appendChild(palette);
+
+    // toggle on click
+    wrap.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".custom-swatch-wrapper.open").forEach(w => w.classList.remove("open"));
+      wrap.classList.toggle("open");
+    });
   });
 
-  syncA(blendColorA);
-  syncB(blendColorB);
+  // close when clicking outside
+  document.addEventListener("click", () => {
+    document.querySelectorAll(".custom-swatch-wrapper.open").forEach(w => w.classList.remove("open"));
+  });
 }
 
 // Show sticky only on mobile, but hide in focus mode (CSS handles most)
@@ -241,7 +356,7 @@ function init() {
     setupCanvasEvents();
     setupZoom();
     setupBlendUI();
-
+    setupBlendPalettes();
     // Set initial custom color
     //   currentColor = customColorInput.value;
     //   customColorDisplay.style.backgroundColor = currentColor;
@@ -646,11 +761,19 @@ function setupCanvasEvents() {
             drawCtx.strokeStyle = currentColor;
             drawCtx.lineWidth = parseInt(brushSizeInput.value, 10);
         } else if (mode === "fill") {
-        const style = (blendType === "solid")
-            ? { type: "solid", solidColor: currentColor }          // keep existing single-color fill
-            : { type: blendType, colorA: blendColorA, colorB: blendColorB };
-        floodFillStyled(x, y, style);
-        saveState();
+            let style = { type: blendType, colorA: blendColorA, colorB: blendColorB };
+
+            // Handle Solid A/B explicitly
+            if (blendType === "solid-a") {
+                style.type = "solid";
+                style.solidColor = blendColorA;
+            } else if (blendType === "solid-b") {
+                style.type = "solid";
+                style.solidColor = blendColorB;
+            }
+
+            floodFillStyled(x, y, style);
+            saveState();
         } else if (mode === "eyedropper") {
             eyedropper(x, y);
         }
@@ -785,7 +908,9 @@ function eyedropper(x, y) {
 
     // Convert sampled color to Hex
     const sampledColor = rgbToHex(r, g, b);
-
+    blendColorAInput.value = sampledColor;
+    blendColorAInput.dispatchEvent(new Event("input", { bubbles: true }));
+    
     // If the sampled color is mostly transparent (background), ignore
     if (a < 50) return;
 
@@ -800,6 +925,8 @@ function eyedropper(x, y) {
     let matchedSwatch = [...paletteContainer.children].find(sw => {
         return toRgbString(sw.style.backgroundColor) === sampledRGB;
     });
+
+
 
     if (matchedSwatch) {
         currentColor = sampledColor; // keep hex as working color
@@ -933,135 +1060,135 @@ function floodFill(startX, startY, fillColor) {
 }
 
 function floodFillStyled(startX, startY, style) {
-  // 1) Build mask for the clicked region (similar to floodFill, but writes alpha only)
-  const sx = Math.floor(startX * canvasDpr);
-  const sy = Math.floor(startY * canvasDpr);
+    // 1) Build mask for the clicked region (similar to floodFill, but writes alpha only)
+    const sx = Math.floor(startX * canvasDpr);
+    const sy = Math.floor(startY * canvasDpr);
 
-  const w = drawCanvas.width, h = drawCanvas.height;
-  if (!w || !h) return;
+    const w = drawCanvas.width, h = drawCanvas.height;
+    if (!w || !h) return;
 
-  const comp = document.createElement("canvas");
-  comp.width = w; comp.height = h;
-  const cctx = comp.getContext("2d");
-  cctx.drawImage(lineCanvas, 0, 0);
-  cctx.drawImage(drawCanvas, 0, 0);
+    const comp = document.createElement("canvas");
+    comp.width = w; comp.height = h;
+    const cctx = comp.getContext("2d");
+    cctx.drawImage(lineCanvas, 0, 0);
+    cctx.drawImage(drawCanvas, 0, 0);
 
-  const imgData = cctx.getImageData(0, 0, w, h);
-  const data = imgData.data;
+    const imgData = cctx.getImageData(0, 0, w, h);
+    const data = imgData.data;
 
-  const startIdx = (sy * w + sx) * 4;
+    const startIdx = (sy * w + sx) * 4;
 
-  const isLinePixel = (idx) => {
-    const r = data[idx], g = data[idx+1], b = data[idx+2], a = data[idx+3];
-    return a > 200 && r < 40 && g < 40 && b < 40;
-  };
-  if (isLinePixel(startIdx)) return;
+    const isLinePixel = (idx) => {
+        const r = data[idx], g = data[idx + 1], b = data[idx + 2], a = data[idx + 3];
+        return a > 200 && r < 40 && g < 40 && b < 40;
+    };
+    if (isLinePixel(startIdx)) return;
 
-  const target = {
-    r: data[startIdx], g: data[startIdx+1], b: data[startIdx+2], a: data[startIdx+3]
-  };
+    const target = {
+        r: data[startIdx], g: data[startIdx + 1], b: data[startIdx + 2], a: data[startIdx + 3]
+    };
 
-  const TOL = 24;
-  const match = (idx) => {
-    const r = data[idx], g = data[idx+1], b = data[idx+2], a = data[idx+3];
-    return Math.abs(r-target.r)<=TOL && Math.abs(g-target.g)<=TOL &&
-           Math.abs(b-target.b)<=TOL && Math.abs(a-target.a)<=TOL;
-  };
-  if (!match(startIdx)) return;
+    const TOL = 24;
+    const match = (idx) => {
+        const r = data[idx], g = data[idx + 1], b = data[idx + 2], a = data[idx + 3];
+        return Math.abs(r - target.r) <= TOL && Math.abs(g - target.g) <= TOL &&
+            Math.abs(b - target.b) <= TOL && Math.abs(a - target.a) <= TOL;
+    };
+    if (!match(startIdx)) return;
 
-  // Mask canvas (alpha=255 inside region)
-  const mask = document.createElement("canvas");
-  mask.width = w; mask.height = h;
-  const mctx = mask.getContext("2d");
-  const mdata = mctx.createImageData(w, h);
-  const md = mdata.data;
+    // Mask canvas (alpha=255 inside region)
+    const mask = document.createElement("canvas");
+    mask.width = w; mask.height = h;
+    const mctx = mask.getContext("2d");
+    const mdata = mctx.createImageData(w, h);
+    const md = mdata.data;
 
-  const stack = [[sx, sy]];
-  while (stack.length) {
-    const [x, y] = stack.pop();
-    if (x<0 || x>=w || y<0 || y>=h) continue;
-    const idx = (y*w + x) * 4;
-    if (!match(idx) || isLinePixel(idx)) continue;
+    const stack = [[sx, sy]];
+    while (stack.length) {
+        const [x, y] = stack.pop();
+        if (x < 0 || x >= w || y < 0 || y >= h) continue;
+        const idx = (y * w + x) * 4;
+        if (!match(idx) || isLinePixel(idx)) continue;
 
-    // Mark pixel in mask (opaque white)
-    md[idx]   = 255; md[idx+1] = 255; md[idx+2] = 255; md[idx+3] = 255;
+        // Mark pixel in mask (opaque white)
+        md[idx] = 255; md[idx + 1] = 255; md[idx + 2] = 255; md[idx + 3] = 255;
 
-    // "consume" so we don't visit again
-    data[idx] = 255; data[idx+1] = 0; data[idx+2] = 255; data[idx+3] = 255;
+        // "consume" so we don't visit again
+        data[idx] = 255; data[idx + 1] = 0; data[idx + 2] = 255; data[idx + 3] = 255;
 
-    stack.push([x+1,y]); stack.push([x-1,y]); stack.push([x,y+1]); stack.push([x,y-1]);
-  }
-  mctx.putImageData(mdata, 0, 0);
+        stack.push([x + 1, y]); stack.push([x - 1, y]); stack.push([x, y + 1]); stack.push([x, y - 1]);
+    }
+    mctx.putImageData(mdata, 0, 0);
 
-  // 2) Create a texture layer (solid/gradient/pattern) covering the full canvas
-  const tex = document.createElement("canvas");
-  tex.width = w; tex.height = h;
-  const tctx = tex.getContext("2d");
-  applyStyleFill(tctx, style, w, h);
+    // 2) Create a texture layer (solid/gradient/pattern) covering the full canvas
+    const tex = document.createElement("canvas");
+    tex.width = w; tex.height = h;
+    const tctx = tex.getContext("2d");
+    applyStyleFill(tctx, style, w, h);
 
-  // 3) Clip the texture to the region via the mask: texture DESTINATION-IN mask
-  tctx.globalCompositeOperation = "destination-in";
-  tctx.drawImage(mask, 0, 0);
+    // 3) Clip the texture to the region via the mask: texture DESTINATION-IN mask
+    tctx.globalCompositeOperation = "destination-in";
+    tctx.drawImage(mask, 0, 0);
 
-  // 4) Paint clipped texture onto the user color layer
-  drawCtx.globalCompositeOperation = "source-over";
-//   drawCtx.drawImage(tex, 0, 0);
-  drawCtx.drawImage(tex, 0, 0, canvasCssW, canvasCssH);
+    // 4) Paint clipped texture onto the user color layer
+    drawCtx.globalCompositeOperation = "source-over";
+    //   drawCtx.drawImage(tex, 0, 0);
+    drawCtx.drawImage(tex, 0, 0, canvasCssW, canvasCssH);
 
-  downloadBtn.classList.add("active");
-  hasColored = true;
+    downloadBtn.classList.add("active");
+    hasColored = true;
 }
 
-function applyStyleFill(ctx, style, w, h){
-  const A = style.colorA || "#10b981";
-  const B = style.colorB || "#0ea5e9";
-  const type = style.type || "solid";
+function applyStyleFill(ctx, style, w, h) {
+    const A = style.colorA || "#10b981";
+    const B = style.colorB || "#0ea5e9";
+    const type = style.type || "solid";
 
-  if (type === "solid") {
-    ctx.fillStyle = style.solidColor || currentColor;
-    ctx.fillRect(0,0,w,h);
-    return;
-  }
-
-  if (type === "linear-lr" || type === "linear-tb" || type === "radial") {
-    let grad;
-    if (type === "linear-lr") grad = ctx.createLinearGradient(0, 0, w, 0);
-    if (type === "linear-tb") grad = ctx.createLinearGradient(0, 0, 0, h);
-    if (type === "radial") {
-      const r = Math.sqrt(w*w + h*h)/2;
-      grad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, r);
+    if (type === "solid") {
+        ctx.fillStyle = style.solidColor || currentColor;
+        ctx.fillRect(0, 0, w, h);
+        return;
     }
-    grad.addColorStop(0, A);
-    grad.addColorStop(1, B);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,w,h);
-    return;
-  }
 
-  if (type === "stripe" || type === "dots") {
-    // small pattern tile
-    const tile = document.createElement("canvas");
-    const s = (type === "stripe") ? 16 : 12;
-    tile.width = s; tile.height = s;
-    const p = tile.getContext("2d");
-
-    if (type === "stripe") {
-      // background B
-      p.fillStyle = B; p.fillRect(0,0,s,s);
-      // diagonal A
-      p.strokeStyle = A; p.lineWidth = 6;
-      p.beginPath(); p.moveTo(-4, s-4); p.lineTo(s+4, -4); p.stroke();
-    } else {
-      // dots: B background with A circles
-      p.fillStyle = B; p.fillRect(0,0,s,s);
-      p.fillStyle = A;
-      p.beginPath(); p.arc(s/2, s/2, s*0.25, 0, Math.PI*2); p.fill();
+    if (type === "linear-lr" || type === "linear-tb" || type === "radial") {
+        let grad;
+        if (type === "linear-lr") grad = ctx.createLinearGradient(0, 0, w, 0);
+        if (type === "linear-tb") grad = ctx.createLinearGradient(0, 0, 0, h);
+        if (type === "radial") {
+            const r = Math.sqrt(w * w + h * h) / 2;
+            grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, r);
+        }
+        grad.addColorStop(0, A);
+        grad.addColorStop(1, B);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+        return;
     }
-    const pat = ctx.createPattern(tile, "repeat");
-    ctx.fillStyle = pat;
-    ctx.fillRect(0,0,w,h);
-    return;
-  }
+
+    if (type === "stripe" || type === "dots") {
+        // small pattern tile
+        const tile = document.createElement("canvas");
+        const s = (type === "stripe") ? 16 : 12;
+        tile.width = s; tile.height = s;
+        const p = tile.getContext("2d");
+
+        if (type === "stripe") {
+            // background B
+            p.fillStyle = B; p.fillRect(0, 0, s, s);
+            // diagonal A
+            p.strokeStyle = A; p.lineWidth = 6;
+            p.beginPath(); p.moveTo(-4, s - 4); p.lineTo(s + 4, -4); p.stroke();
+        } else {
+            // dots: B background with A circles
+            p.fillStyle = B; p.fillRect(0, 0, s, s);
+            p.fillStyle = A;
+            p.beginPath(); p.arc(s / 2, s / 2, s * 0.25, 0, Math.PI * 2); p.fill();
+        }
+        const pat = ctx.createPattern(tile, "repeat");
+        ctx.fillStyle = pat;
+        ctx.fillRect(0, 0, w, h);
+        return;
+    }
 }
 
 // Normalize any CSS color (#hex or rgb/rgba) to [r,g,b]
