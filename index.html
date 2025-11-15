@@ -67,37 +67,44 @@
 
         <!-- Blend & Patterns -->
         <div class="tool-group" id="blendGroup">
-          <span class="tool-label">Colors</span>
-
-          <!-- Color A & B pickers -->
-          <div class="custom-swatch-wrapper" title="A">
-            <input type="color" id="blendColorA" value="#10b981" />
-            <div id="blendColorASwatch" class="color-swatch" style="background:#10b981"></div>
+          <div class="border-label-box" >
+            <span class="border-label">Change Colors</span>
+            <div style="display: flex; gap: 8px; ">
+              <!-- Color A & B pickers -->
+              <div class="custom-swatch-wrapper" title="">
+                <input type="color" id="blendColorA" value="#10b981" />
+                <div id="blendColorASwatch" class="color-swatch" style="background:#10b981"></div>
+              </div>
+              <div class="custom-swatch-wrapper" title="">
+                <input type="color" id="blendColorB" value="#0ea5e9" />
+                <div id="blendColorBSwatch" class="color-swatch" style="background:#0ea5e9"></div>
+              </div>
+            </div>
           </div>
-          <div class="custom-swatch-wrapper" title="B">
-            <input type="color" id="blendColorB" value="#0ea5e9" />
-            <div id="blendColorBSwatch" class="color-swatch" style="background:#0ea5e9"></div>
-          </div>
-
           <!-- Blend / Pattern Presets -->
-<div id="blendPatternPanel" class="blend-pattern-panel">
-  <!-- Solids -->
-  <button class="blend-sample" data-type="solid-a" aria-label="Solid Color A"></button>
+          <div id="blendPatternPanel" class="blend-pattern-panel"  >
+            <div class="border-label-box">
+            <span class="border-label">Select pattern to fill</span>
+            <!-- Solids -->
+             <div style="gap: 8px; ">  
+            <button class="blend-sample" data-type="solid-a" aria-label="Solid Color A"></button>
 
 
-  <!-- Gradients -->
-  <button class="blend-sample" data-type="linear-lr" aria-label="Left to Right Gradient"></button>
-  <button class="blend-sample" data-type="linear-tb" aria-label="Top to Bottom Gradient"></button>
-  <button class="blend-sample" data-type="radial" aria-label="Radial Gradient"></button>
-  <button class="blend-sample" data-type="glow" aria-label="Soft Glow"></button>
+            <!-- Gradients -->
+            <button class="blend-sample" data-type="linear-lr" aria-label="Left to Right Gradient"></button>
+            <button class="blend-sample" data-type="linear-tb" aria-label="Top to Bottom Gradient"></button>
+            <button class="blend-sample" data-type="radial" aria-label="Radial Gradient"></button>
+            <button class="blend-sample" data-type="glow" aria-label="Soft Glow"></button>
 
-  <!-- Patterns -->
-  <button class="blend-sample" data-type="stripe" aria-label="Bold Stripes"></button>
-  <button class="blend-sample" data-type="stripe-soft" aria-label="Soft Stripes"></button>
-  <button class="blend-sample" data-type="dots" aria-label="Bold Dots"></button>
-  <button class="blend-sample" data-type="dots-soft" aria-label="Soft Dots"></button>
-  <button class="blend-sample" data-type="solid-b" aria-label="Solid Color B"></button>
-</div>
+            <!-- Patterns -->
+            <button class="blend-sample" data-type="stripe" aria-label="Bold Stripes"></button>
+            <button class="blend-sample" data-type="stripe-soft" aria-label="Soft Stripes"></button>
+            <button class="blend-sample" data-type="dots" aria-label="Bold Dots"></button>
+            <button class="blend-sample" data-type="dots-soft" aria-label="Soft Dots"></button>
+            <button class="blend-sample" data-type="solid-b" aria-label="Solid Color B"></button>
+            </div>
+            </div>
+          </div>
 
 
         </div>
@@ -120,6 +127,8 @@
               class="fas fa-fill-drip"></i></button>
           <button class="mode-btn" id="modeEyedropper" data-mode="eyedropper" title="Eyedropper Tool (Sample Color)"><i
               class="fas fa-eye-dropper"></i></button>
+          <button class="btn" id="undoBtn"><i class="fas fa-undo"></i> Undo</button>
+          <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>
         </div>
 
         <!-- <div class="tool-group">
@@ -128,10 +137,9 @@
         </div> -->
 
         <div class="tool-group persist">
-          <button class="btn" id="undoBtn"><i class="fas fa-undo"></i> Undo</button>
-          <button class="btn" id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>
+
           <button id="toggleToolsBtn" class="btn" title="Hide/Show Tools">
-            <i class="fas fa-chevron-up"></i> Hide Tools
+            <i class="fas fa-chevron-up"></i> Hide
           </button>
           <button id="focusBtn" class="btn" title="Focus Mode (hide sidebar)">
             <i class="fas fa-maximize"></i> Focus
@@ -139,7 +147,7 @@
           <button id="fsBtn" style="display: none;" class="btn" title="Fullscreen Canvas">
             <i class="fas fa-expand"></i> Fullscreen
           </button>
-          <button id="downloadBtn" class="btn primary" title="Download your finished coloring">Download Artwork</button>
+          <button id="downloadBtn" class="btn primary" title="Download your finished coloring">Download</button>
         </div>
 
       </div>

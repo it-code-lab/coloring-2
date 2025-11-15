@@ -242,7 +242,7 @@
     /* Let sliders have a consistent width so the bar feels aligned */
     #brushSize,
     #zoomRange {
-        min-width: 160px;
+        width: 80px;
     }
 
     /* Palette can wrap within its group if needed */
@@ -409,7 +409,7 @@
         background: #ffffff;
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow-soft);
-        padding: 18px;
+        padding: 0px !important;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -421,7 +421,7 @@
     #drawCanvas {
         position: absolute;
         inset: 0;
-        margin: auto;
+        /* margin: auto; */
         max-width: 100%;
         max-height: 100%;
         border-radius: var(--radius-lg);
@@ -658,8 +658,8 @@
 }
 
 #blendGroup .custom-swatch-wrapper {
-  width: 60px;
-  height: 38px;
+  width: 50px;
+  height: 40px;
   border-radius: 10px;
   border: 2px solid #ffffff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.15);
@@ -794,3 +794,22 @@
   display: none !important;
 }
 
+.border-label-box {
+  position: relative;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 12px 5px 5px;
+  /* margin-bottom: 10px; */
+  background: #fff;
+}
+
+.border-label-box .border-label {
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: #fff;
+  padding: 0 6px;
+  font-size: 12px;
+  color: #555;
+  font-weight: 500;
+}

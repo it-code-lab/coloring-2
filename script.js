@@ -408,10 +408,10 @@ function setToolsCollapsed(collapsed) {
     const icon = toggleToolsBtn.querySelector("i");
     if (collapsed) {
         toggleToolsBtn.title = "Show Tools";
-        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Show Tools';
+        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Show';
     } else {
         toggleToolsBtn.title = "Hide Tools";
-        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide Tools';
+        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide';
     }
     // Refit canvas to new available space
     // if (currentPage) loadPage(currentPage.src, false);
