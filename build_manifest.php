@@ -15,7 +15,7 @@
 header('Content-Type: text/plain; charset=utf-8');
 
 // -------- Config --------
-$version   = $_GET['version'] ?? ($argv[1] ?? 'v1');
+$version   = $_GET['version'] ?? ($argv[1] ?? 'v2');
 $force     = (int)($_GET['force'] ?? ($argv[2] ?? 0));  // 1 = overwrite thumbs
 $thumbEdge = 640; // long edge for @2x thumbs
 $memLimit  = '512M';
@@ -120,32 +120,55 @@ foreach ($catDirs as $catDir) {
   safe_mkdir($thumbsDir);
 
   $items = [];
-  $pngs = glob($pagesDir . '/*.png');
-  sort($pngs, SORT_NATURAL | SORT_FLAG_CASE);
 
-  foreach ($pngs as $png) {
-    $id = pathinfo($png, PATHINFO_FILENAME);
-    $thumb = $thumbsDir . '/' . $id . '@2x.webp';
+// Collect both PNG and SVG files from /pages
+$files = array_merge(
+  glob($pagesDir . '/*.png'),
+  glob($pagesDir . '/*.svg')
+);
 
-    $ok = ensure_webp_thumb($png, $thumb, $thumbEdge, $force, $HAS_IMAGICK, $HAS_GD);
-    if (!$ok) { echo "WARN: Failed thumb: $thumb\n"; }
+// Remove duplicates just in case
+$files = array_unique($files);
 
-    // gather size
-    $sz = @getimagesize($png);
-    $w = $sz ? $sz[0] : 1600;
-    $h = $sz ? $sz[1] : 1200;
+// Natural sort so 1,2,10 instead of 1,10,2
+sort($files, SORT_NATURAL | SORT_FLAG_CASE);
 
-    $items[] = [
-      'id'    => $id,
-      'label' => ucwords(str_replace(['-', '_'], ' ', $id)),
-      'src'   => $baseUrl . $slug . '/pages/'  . $id . '.png',
-      'thumb' => $baseUrl . $slug . '/thumbs/' . $id . '@2x.webp',
-      'w'     => $w,
-      'h'     => $h
-    ];
-    $totalPages++;
-    $totalThumbs++;
+foreach ($files as $file) {
+  $id  = pathinfo($file, PATHINFO_FILENAME);
+  $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION)); // 'png' or 'svg'
+
+  // If SVG: use original file as thumb
+  if ($ext === 'svg') {
+      $thumbUrl = $baseUrl . $slug . '/pages/' . $id . '.svg';
+  } else {
+      // PNG case stays the same
+      $thumb = $thumbsDir . '/' . $id . '@2x.webp';
+      $ok = ensure_webp_thumb($file, $thumb, $thumbEdge, $force, $HAS_IMAGICK, $HAS_GD);
+      if (!$ok) { 
+        echo "WARN: Failed thumb: $thumb (from $file)\n"; 
+      }
+      $thumbUrl = $baseUrl . $slug . '/thumbs/' . $id . '@2x.webp';
   }
+
+  // Get size (for PNG will work; for SVG may return false, then defaults)
+  $sz = @getimagesize($file);
+  $w = $sz ? $sz[0] : 1600;
+  $h = $sz ? $sz[1] : 1200;
+
+  $items[] = [
+    'id'    => $id,
+    'label' => ucwords(str_replace(['-', '_'], ' ', $id)),
+    // Use the actual extension here (.png OR .svg)
+    'src'   => $baseUrl . $slug . '/pages/'  . $id . '.' . $ext,
+    'thumb' => $thumbUrl,
+    'w'     => $w,
+    'h'     => $h
+  ];
+
+  $totalPages++;
+  $totalThumbs++;
+}
+
 
   $categories[] = [
     'id'    => $slug,
