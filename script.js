@@ -79,6 +79,12 @@ let currentMode = "fill";
 let isDrawing = false;
 let lastX = 0, lastY = 0;
 let undoStack = [];
+
+let zoomScale = 1;
+let zoomOffsetX = 0;
+let zoomOffsetY = 0;
+
+
 const MAX_UNDO = 25;
 
 const thumbsEl = document.getElementById("thumbsContainer");
@@ -329,6 +335,124 @@ async function fetchManifestWithCache() {
 }
 
 function setupZoom() {
+    if (!canvasInner || !zoomRange || !canvasWrapper) return;
+
+    const clamp = (val, min, max) => Math.min(max, Math.max(min, val));
+
+    const minScale = (parseInt(zoomRange.min, 10) || 50) / 100;
+    const maxScale = (parseInt(zoomRange.max, 10) || 400) / 100;
+
+    function applyZoomTransform() {
+        canvasInner.style.transform =
+            `translate(${zoomOffsetX}px, ${zoomOffsetY}px) scale(${zoomScale})`;
+    }
+
+    function zoomAroundPoint(newScale, clientX, clientY) {
+        const wrapperRect = canvasWrapper.getBoundingClientRect();
+        const localX = clientX - wrapperRect.left;
+        const localY = clientY - wrapperRect.top;
+
+        // Convert screen (local) point to "world" coordinates (before scaling)
+        const worldX = (localX - zoomOffsetX) / zoomScale;
+        const worldY = (localY - zoomOffsetY) / zoomScale;
+
+        zoomScale = clamp(newScale, minScale, maxScale);
+
+        // Recompute offset so that world point stays under the same screen point
+        zoomOffsetX = localX - worldX * zoomScale;
+        zoomOffsetY = localY - worldY * zoomScale;
+
+        applyZoomTransform();
+
+        // Keep slider in sync
+        zoomRange.value = String(Math.round(zoomScale * 100));
+    }
+
+    // --- Slider control: zoom around the center of the wrapper ---
+    zoomRange.addEventListener("input", () => {
+        const wrapperRect = canvasWrapper.getBoundingClientRect();
+        const centerX = wrapperRect.left + wrapperRect.width / 2;
+        const centerY = wrapperRect.top + wrapperRect.height / 2;
+        const targetScale = parseInt(zoomRange.value, 10) / 100;
+        zoomAroundPoint(targetScale, centerX, centerY);
+    });
+
+    // Initial zoom
+    zoomScale = parseInt(zoomRange.value, 10) / 100 || 1;
+    zoomOffsetX = 0;
+    zoomOffsetY = 0;
+    applyZoomTransform();
+
+    // --- Desktop: Ctrl + Mouse Wheel zooms around cursor position ---
+    canvasWrapper.addEventListener("wheel", (e) => {
+        if (!e.ctrlKey) return;
+        e.preventDefault();
+
+        const factor = e.deltaY < 0 ? 1.1 : 0.9; // in vs out
+        const targetScale = zoomScale * factor;
+
+        zoomAroundPoint(targetScale, e.clientX, e.clientY);
+    }, { passive: false });
+
+    // --- Mobile: Pinch-to-zoom (two fingers) with targeted zoom ---
+    let pinchStartDist = null;
+    let pinchStartScale = 1;
+
+    function getDistance(t1, t2) {
+        const dx = t2.clientX - t1.clientX;
+        const dy = t2.clientY - t1.clientY;
+        return Math.hypot(dx, dy);
+    }
+
+    canvasWrapper.addEventListener("touchstart", (e) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            pinchStartDist = getDistance(e.touches[0], e.touches[1]);
+            pinchStartScale = zoomScale;
+        }
+    }, { passive: false });
+
+    canvasWrapper.addEventListener("touchmove", (e) => {
+        if (e.touches.length === 2 && pinchStartDist) {
+            e.preventDefault();
+
+            const newDist = getDistance(e.touches[0], e.touches[1]);
+            let targetScale = pinchStartScale * (newDist / pinchStartDist);
+            targetScale = clamp(targetScale, minScale, maxScale);
+
+            // Midpoint between the two fingers = zoom focus
+            const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+            const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+            zoomAroundPoint(targetScale, midX, midY);
+        }
+    }, { passive: false });
+
+    canvasWrapper.addEventListener("touchend", (e) => {
+        if (!e.touches || e.touches.length < 2) {
+            pinchStartDist = null;
+        }
+    });
+
+    canvasWrapper.addEventListener("touchcancel", () => {
+        pinchStartDist = null;
+    });
+
+        // 🔹 Reset Zoom button
+    const resetZoomBtn = document.getElementById("resetZoomBtn");
+    if (resetZoomBtn) {
+        resetZoomBtn.addEventListener("click", () => {
+            zoomScale = 1;
+            zoomOffsetX = 0;
+            zoomOffsetY = 0;
+            zoomRange.value = "100";
+            applyZoomTransform();
+        });
+    }
+}
+
+
+function setupZoom_old() {
     if (!canvasInner || !zoomRange) return;
 
     const applyZoom = () => {
@@ -756,6 +880,11 @@ function setupCanvasEvents() {
 
 
     const start = (e) => {
+        // Ignore multi-touch here; used for pinch zoom instead
+        if (e.touches && e.touches.length > 1) {
+            return;
+        }
+
         e.preventDefault();
         if (!drawCanvas.width) {
             console.warn("[CC] drawCanvas has zero size, ignoring action");
