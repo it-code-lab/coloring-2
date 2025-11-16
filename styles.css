@@ -449,7 +449,7 @@
 
     /* Let the toolbar scroll horizontally on small screens */
     .toolbar {
-        overflow-x: auto;
+        overflow-x: visible;
         -webkit-overflow-scrolling: touch;
     }
 
