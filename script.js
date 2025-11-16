@@ -880,9 +880,16 @@ function setupCanvasEvents() {
 
 
     const start = (e) => {
-        // Ignore multi-touch here; used for pinch zoom instead
+        // --- Handle multi-touch (pinch) first ---
         if (e.touches && e.touches.length > 1) {
-            return;
+            // Two fingers just went down → this is a pinch, not a color action.
+
+            // If we *just* did a fill/tap on the previous single touch,
+            // undo that last change so the accidental color disappears.
+            if (!isDrawing && undoStack && undoStack.length > 0) {
+                restoreState();
+            }
+            return; // don't start brush / fill / eyedropper for multi-touch
         }
 
         e.preventDefault();
@@ -921,6 +928,14 @@ function setupCanvasEvents() {
     };
 
     const move = (e) => {
+        // If a second finger appears during a stroke, stop drawing – this is a pinch now.
+        if (e.touches && e.touches.length > 1) {
+            if (isDrawing) {
+                isDrawing = false;
+            }
+            return;
+        }
+        
         if (!isDrawing || currentMode !== "brush") return;
         e.preventDefault();
         const { x, y } = getPos(e);
