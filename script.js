@@ -141,32 +141,60 @@ function sampleBackground(type, A, B) {
     switch (type) {
         case "solid-a": return A;
         case "solid-b": return B;
-        case "linear-lr": return `linear-gradient(90deg, ${A} 0%, ${B} 100%)`;
-        case "linear-tb": return `linear-gradient(180deg, ${A} 0%, ${B} 100%)`;
-        case "radial": return `radial-gradient(circle at 50% 50%, ${A} 0%, ${B} 100%)`;
-        case "stripe": return `repeating-linear-gradient(135deg, ${A} 0 8px, ${B} 8px 16px)`;
-        // New: softer, thinner stripes
+
+        case "linear-lr":
+            return `linear-gradient(90deg, ${A} 0%, ${B} 100%)`;
+        case "linear-tb":
+            return `linear-gradient(180deg, ${A} 0%, ${B} 100%)`;
+        case "radial":
+            return `radial-gradient(circle at 50% 50%, ${A} 0%, ${B} 100%)`;
+
+        // Diagonal zebra stripes
+        case "stripe":
+            return `repeating-linear-gradient(135deg, ${A} 0 8px, ${B} 8px 16px)`;
+        // Thinner diagonal stripes
         case "stripe-soft":
             return `repeating-linear-gradient(135deg, ${A} 0 4px, ${B} 4px 8px)`;
 
-        case "dots": return `radial-gradient(${A} 28%, transparent 29%), radial-gradient(${A} 28%, transparent 29%), ${B}`;
-        // New: softer dots with more spacing
-        case "dots-soft":
-            return `radial-gradient(${A} 18%, transparent 19%), radial-gradient(${A} 18%, transparent 19%), ${B}`;
+        // New: crosshatch (stripes both directions)
+        case "crosshatch":
+            return `
+                repeating-linear-gradient(135deg, ${A} 0 4px, transparent 4px 8px),
+                repeating-linear-gradient(45deg,  ${A} 0 4px, ${B} 4px 8px)
+            `;
 
-        // New: soft center glow
+        // New: checkerboard
+        case "checker":
+            return `
+                repeating-conic-gradient(${A} 0 25%, ${B} 25% 50%) 
+                0 0 / 12px 12px
+            `;
+
+        // Dots
+        case "dots":
+            return `radial-gradient(${A} 28%, transparent 29%),
+                    radial-gradient(${A} 28%, transparent 29%),
+                    ${B}`;
+        case "dots-soft":
+            return `radial-gradient(${A} 18%, transparent 19%),
+                    radial-gradient(${A} 18%, transparent 19%),
+                    ${B}`;
+
+        // Soft center glow
         case "glow":
             return `radial-gradient(circle at 50% 40%, ${A} 0%, ${A} 35%, ${B} 100%)`;
 
-        default: return B;
+        default:
+            return B;
     }
 }
+
 
 
 function setBlendType(t) {
     blendType = t;
     if (t === "solid-a") currentColor = blendColorA;
-    if (t === "solid-b") currentColor = blendColorB;    
+    if (t === "solid-b") currentColor = blendColorB;
     renderBlendSamples();
 }
 
@@ -221,53 +249,53 @@ function setupBlendUI() {
 
 // ---------- Quick Palette for Blend Colors ----------
 function setupBlendPalettes() {
-  const popularColors = [
-    "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#00FFFF",
-    "#0000FF", "#8B00FF", "#FFC0CB", "#FFD700", "#FFFFFF",
-    "#000000", "#808080", "#A52A2A", "#228B22", "#6495ED"
-  ];
+    const popularColors = [
+        "#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#00FFFF",
+        "#0000FF", "#8B00FF", "#FFC0CB", "#FFD700", "#FFFFFF",
+        "#000000", "#808080", "#A52A2A", "#228B22", "#6495ED"
+    ];
 
-  const wrappers = [blendColorAInput.parentElement, blendColorBInput.parentElement];
+    const wrappers = [blendColorAInput.parentElement, blendColorBInput.parentElement];
 
-  wrappers.forEach((wrap, idx) => {
-    // ensure relative positioning for palette dropdown
-    wrap.style.position = "relative";
-    const palette = document.createElement("div");
-    palette.className = "blend-palette";
-    popularColors.forEach(col => {
-      const dot = document.createElement("div");
-      dot.className = "color-dot";
-      dot.style.background = col;
-      dot.addEventListener("click", (e) => {
-        // if (idx === 0) blendColorAInput.value = col;
-        // else blendColorBInput.value = col;
-        // blendColorA = blendColorAInput.value;
-        // blendColorB = blendColorBInput.value;
-        // renderBlendSamples();
-        // wrap.classList.remove("open");
-        e.stopPropagation(); // don't toggle the wrapper again        
-        const targetInput = (idx === 0) ? blendColorAInput : blendColorBInput;
-        targetInput.value = col;
-        // fire the same pipeline your color inputs use (updates A/B vars + swatch UI)
-        targetInput.dispatchEvent(new Event("input", { bubbles: true }));
-        wrap.classList.remove("open");        
-      });
-      palette.appendChild(dot);
+    wrappers.forEach((wrap, idx) => {
+        // ensure relative positioning for palette dropdown
+        wrap.style.position = "relative";
+        const palette = document.createElement("div");
+        palette.className = "blend-palette";
+        popularColors.forEach(col => {
+            const dot = document.createElement("div");
+            dot.className = "color-dot";
+            dot.style.background = col;
+            dot.addEventListener("click", (e) => {
+                // if (idx === 0) blendColorAInput.value = col;
+                // else blendColorBInput.value = col;
+                // blendColorA = blendColorAInput.value;
+                // blendColorB = blendColorBInput.value;
+                // renderBlendSamples();
+                // wrap.classList.remove("open");
+                e.stopPropagation(); // don't toggle the wrapper again        
+                const targetInput = (idx === 0) ? blendColorAInput : blendColorBInput;
+                targetInput.value = col;
+                // fire the same pipeline your color inputs use (updates A/B vars + swatch UI)
+                targetInput.dispatchEvent(new Event("input", { bubbles: true }));
+                wrap.classList.remove("open");
+            });
+            palette.appendChild(dot);
+        });
+        wrap.appendChild(palette);
+
+        // toggle on click
+        wrap.addEventListener("click", (e) => {
+            e.stopPropagation();
+            document.querySelectorAll(".custom-swatch-wrapper.open").forEach(w => w.classList.remove("open"));
+            wrap.classList.toggle("open");
+        });
     });
-    wrap.appendChild(palette);
 
-    // toggle on click
-    wrap.addEventListener("click", (e) => {
-      e.stopPropagation();
-      document.querySelectorAll(".custom-swatch-wrapper.open").forEach(w => w.classList.remove("open"));
-      wrap.classList.toggle("open");
+    // close when clicking outside
+    document.addEventListener("click", () => {
+        document.querySelectorAll(".custom-swatch-wrapper.open").forEach(w => w.classList.remove("open"));
     });
-  });
-
-  // close when clicking outside
-  document.addEventListener("click", () => {
-    document.querySelectorAll(".custom-swatch-wrapper.open").forEach(w => w.classList.remove("open"));
-  });
 }
 
 // Show sticky only on mobile, but hide in focus mode (CSS handles most)
@@ -442,7 +470,7 @@ function setupZoom() {
         pinchStartDist = null;
     });
 
-        // 🔹 Reset Zoom button
+    // 🔹 Reset Zoom button
     const resetZoomBtn = document.getElementById("resetZoomBtn");
     if (resetZoomBtn) {
         resetZoomBtn.addEventListener("click", () => {
@@ -1071,7 +1099,7 @@ function eyedropper(x, y) {
     const sampledColor = rgbToHex(r, g, b);
     blendColorAInput.value = sampledColor;
     blendColorAInput.dispatchEvent(new Event("input", { bubbles: true }));
-    
+
     // If the sampled color is mostly transparent (background), ignore
     if (a < 50) return;
 
@@ -1340,41 +1368,82 @@ function applyStyleFill(ctx, style, w, h) {
         ctx.fillRect(0, 0, w, h);
         return;
     }
+// --- PATTERN / TEXTURE STYLES ---
+// Special case: bold diagonal STRIPE pattern (clean zebra look)
+if (type === "stripe") {
+    const stripeW = 6; // thickness of dark band in CSS pixels
+    const tile = document.createElement("canvas");
+
+    // Tile is just two bands side by side
+    tile.width = stripeW * 2;
+    tile.height = stripeW * 2;
+
+    const p = tile.getContext("2d");
+
+    // Background = B
+    p.fillStyle = B;
+    p.fillRect(0, 0, tile.width, tile.height);
+
+    // One vertical band = A
+    p.fillStyle = A;
+    p.fillRect(0, 0, stripeW, tile.height);
+
+    // Create pattern and rotate it so vertical bands become diagonal
+    const pattern = ctx.createPattern(tile, "repeat");
+    if (pattern && pattern.setTransform) {
+        const m = new DOMMatrix();
+        m.rotateSelf(45); // 45° diagonal, like the button preview
+        pattern.setTransform(m);
+    }
+
+    ctx.fillStyle = pattern || A; // fallback to solid A if anything fails
+    ctx.fillRect(0, 0, w, h);
+    return;
+}
 
     // --- PATTERN / TEXTURE STYLES ---
-    if (["stripe", "stripe-soft", "dots", "dots-soft"].includes(type)) {
-        // small pattern tile
+    if (["stripe-soft", "dots", "dots-soft", "crosshatch", "checker"].includes(type)) {
         const tile = document.createElement("canvas");
-        let s = 16; // default tile size
+        let s = 18; // base tile size
 
-        if (type === "stripe-soft") s = 12;
-        if (type === "dots-soft") s = 14;
+        if (type === "stripe-soft") s = 16;
+        if (type === "dots-soft") s = 16;
 
         tile.width = s;
         tile.height = s;
         const p = tile.getContext("2d");
 
-        if (type === "stripe" || type === "stripe-soft") {
-            // background B
-            p.fillStyle = B;
-            p.fillRect(0, 0, s, s);
+        // Start with background B for all patterns
+        p.fillStyle = B;
+        p.fillRect(0, 0, s, s);
 
-            // diagonal filled band with no stroke (no outline seams)
-            p.fillStyle = A;
+        if (type === "stripe" || type === "stripe-soft" || type === "crosshatch") {
+            // Diagonal stripes using strokes so we get true "zebra" lines
+            const stripeW = (type === "stripe-soft") ? s / 8 : s / 5;
+
+            p.strokeStyle = A;
+            p.lineWidth = stripeW;
+
+            // First diagonal direction (like 135deg)
             p.beginPath();
-            // extend beyond tile edges so pattern repeats seamlessly
-            p.moveTo(-s, s * 0.7);
-            p.lineTo(0, s * 0.3);
-            p.lineTo(s, s * 0.7);
-            p.lineTo(s * 0.4, s + s * 0.1);
-            p.closePath();
-            p.fill();
-        } else {
-            // dots / dots-soft: B background with A circles
-            p.fillStyle = B;
-            p.fillRect(0, 0, s, s);
-            p.fillStyle = A;
+            for (let x = -s; x <= s * 2; x += stripeW * 2) {
+                p.moveTo(x, -s);
+                p.lineTo(x + s, s);
+            }
+            p.stroke();
 
+            if (type === "crosshatch") {
+                // Second diagonal direction (like 45deg)
+                p.beginPath();
+                for (let x = -s; x <= s * 2; x += stripeW * 2) {
+                    p.moveTo(x, s);
+                    p.lineTo(x + s, -s);
+                }
+                p.stroke();
+            }
+        } else if (type === "dots" || type === "dots-soft") {
+            // Dots pattern
+            p.fillStyle = A;
             const radius = (type === "dots-soft" ? s * 0.25 : s * 0.35);
 
             p.beginPath();
@@ -1384,6 +1453,16 @@ function applyStyleFill(ctx, style, w, h) {
             p.beginPath();
             p.arc(s * 0.8, s * 0.8, radius, 0, Math.PI * 2);
             p.fill();
+        } else if (type === "checker") {
+            // Checkerboard pattern
+            const cell = s / 4;
+            for (let y = 0; y < s; y += cell) {
+                for (let x = 0; x < s; x += cell) {
+                    const useA = ((x / cell) + (y / cell)) % 2 === 0;
+                    p.fillStyle = useA ? A : B;
+                    p.fillRect(x, y, cell, cell);
+                }
+            }
         }
 
         const pattern = ctx.createPattern(tile, "repeat");
