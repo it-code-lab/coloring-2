@@ -363,6 +363,7 @@ function setupZoom() {
         zoomOffsetY = localY - worldY * zoomScale;
 
         applyZoomTransform();
+        updateResetZoomVisibility();
 
         // Keep slider in sync
         zoomRange.value = String(Math.round(zoomScale * 100));
@@ -375,6 +376,7 @@ function setupZoom() {
         const centerY = wrapperRect.top + wrapperRect.height / 2;
         const targetScale = parseInt(zoomRange.value, 10) / 100;
         zoomAroundPoint(targetScale, centerX, centerY);
+        updateResetZoomVisibility();
     });
 
     // Initial zoom
@@ -392,6 +394,7 @@ function setupZoom() {
         const targetScale = zoomScale * factor;
 
         zoomAroundPoint(targetScale, e.clientX, e.clientY);
+        updateResetZoomVisibility();
     }, { passive: false });
 
     // --- Mobile: Pinch-to-zoom (two fingers) with targeted zoom ---
@@ -425,6 +428,7 @@ function setupZoom() {
             const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
 
             zoomAroundPoint(targetScale, midX, midY);
+            updateResetZoomVisibility();
         }
     }, { passive: false });
 
@@ -447,6 +451,7 @@ function setupZoom() {
             zoomOffsetY = 0;
             zoomRange.value = "100";
             applyZoomTransform();
+            updateResetZoomVisibility();
         });
     }
 }
@@ -532,10 +537,10 @@ function setToolsCollapsed(collapsed) {
     const icon = toggleToolsBtn.querySelector("i");
     if (collapsed) {
         toggleToolsBtn.title = "Show Tools";
-        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-down"></i> Show';
+        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-down"></i> <span class="only-large-screens">Show </span>';
     } else {
         toggleToolsBtn.title = "Hide Tools";
-        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-up"></i> Hide';
+        toggleToolsBtn.innerHTML = '<i class="fas fa-chevron-up"></i> <span class="only-large-screens"> Hide </span>';
     }
     // Refit canvas to new available space
     // if (currentPage) loadPage(currentPage.src, false);
@@ -548,10 +553,10 @@ function setFocusMode(on) {
     const icon = focusBtn.querySelector("i");
     if (on) {
         focusBtn.title = "Exit Focus";
-        focusBtn.innerHTML = '<i class="fas fa-minimize"></i> Exit Focus';
+        focusBtn.innerHTML = '<i class="fas fa-minimize"></i> <span class="only-large-screens"> Exit Focus </span>';
     } else {
         focusBtn.title = "Focus Mode (hide sidebar)";
-        focusBtn.innerHTML = '<i class="fas fa-maximize"></i> Focus';
+        focusBtn.innerHTML = '<i class="fas fa-maximize"></i> <span class="only-large-screens">Focus </span>';
     }
     // if (currentPage) loadPage(currentPage.src, false);
     if (currentPage) relayoutKeepingProgress();
@@ -935,7 +940,7 @@ function setupCanvasEvents() {
             }
             return;
         }
-        
+
         if (!isDrawing || currentMode !== "brush") return;
         e.preventDefault();
         const { x, y } = getPos(e);
@@ -1533,6 +1538,17 @@ function downloadArtwork() {
     console.log("[DL-DEBUG] Download process complete.");
 }
 
+function updateResetZoomVisibility() {
+    const resetZoomBtn = document.getElementById("resetZoomBtn");
+    if (!resetZoomBtn) return;
+
+    // Show only if zoom changed
+    if (zoomScale !== 1 || zoomOffsetX !== 0 || zoomOffsetY !== 0) {
+        resetZoomBtn.style.display = "flex";
+    } else {
+        resetZoomBtn.style.display = "none";
+    }
+}
 
 
 function downloadArtwork_onlyColors() {

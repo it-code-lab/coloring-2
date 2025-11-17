@@ -129,6 +129,15 @@
     .focus-mode .canvas-wrapper {
         height: calc(100vh - 120px);
     }
+
+    .only-large-screens {
+        display: none;
+    }
+
+    .patternDiv{
+        max-height: 55px;
+        overflow-y: auto;
+    }
 }
 
 /* Canvas wrapper: let width drive height for landscape */
