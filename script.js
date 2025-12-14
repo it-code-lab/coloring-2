@@ -90,7 +90,7 @@ const MAX_UNDO = 25;
 const thumbsEl = document.getElementById("thumbsContainer");
 const mqlMobile = window.matchMedia("(max-width: 900px)");
 
-const MANIFEST_URL = "/coloring/manifests/v2.json";   // absolute or full URL
+const MANIFEST_URL = "/manifests/v22.json";   // absolute or full URL
 const MANIFEST_MAX_AGE_MS = 60 * 60 * 1000;           // 1 hour cache
 
 

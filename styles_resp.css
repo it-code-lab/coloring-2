@@ -67,9 +67,12 @@
         order: 1;
     }
 
-
+    .content-section{
+        margin: 0px;
+    }
     .canvas-wrapper {
         height: 60vh;
+        max-width: 1000px;
     }
 
 
